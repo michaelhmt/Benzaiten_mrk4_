@@ -1,0 +1,9 @@
+Metadata-Version: 1.2
+Name: norman_join
+Version: 1.0.4
+Summary: Take path parts (strings) and return joined a normalized filepath.
+Home-page: https://github.com/cw-andrews/norman_join
+License: UNKNOWN
+Author: cw-andrews
+Author-email: cwandrews.oh@gmail.com
+Classifier: License :: OSI Approved :: MIT License

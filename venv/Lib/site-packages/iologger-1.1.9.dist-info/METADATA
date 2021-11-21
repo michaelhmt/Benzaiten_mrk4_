@@ -1,0 +1,37 @@
+Metadata-Version: 1.2
+Name: iologger
+Version: 1.1.9
+Summary: Decorator which logs the wrapped function/method.
+Home-page: https://gitlab.com/cw-andrews/IOLogger
+License: UNKNOWN
+Author: cw-andrews
+Author-email: cwandrews.oh@gmail.com
+Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: appdirs (>=1.4.0)
+Requires-Dist: boltons (>=17.0.0)
+Requires-Dist: colorama (>=0.3.7)
+Requires-Dist: hypothesis (>=3.6.1)
+Requires-Dist: Logbook (>=1.0.0)
+Requires-Dist: norman-join (>=1.0.4)
+Requires-Dist: packaging (>=16.8)
+Requires-Dist: py (>=1.4.32)
+Requires-Dist: pyparsing (>=2.1.10)
+Requires-Dist: pytest (>=3.0.6)
+Requires-Dist: six (>=1.10.0)
+Requires-Dist: arrow (>=0.10.0)
+Requires-Dist: python-dateutil (>=2.6.0)
+
+============
+IOLogger
+============
+Decorator which logs the wrapped function/method.
+
+    The following are logged:
+
+        1. name of the function called
+        2. arg(s) passed for the function called (if any)
+        3. kwarg(s) passed for the function called (if any)
+        4. execution time of the function called (in seconds)
+
+        * also catches and logs any **exceptions** raised *gracefully*.
+
