@@ -11,13 +11,8 @@ from bs4 import BeautifulSoup
 import time
 
 
-#www.fanfiction.net/anime/Attack-on-Titan-%E9%80%B2%E6%92%83%E3%81%AE%E5%B7%A8%E4%BA%BA/
-#m.fanfiction.net/anime/Attack-on-Titan-%E9%80%B2%E6%92%83%E3%81%AE%E5%B7%A8%E4%BA%BA/?&srt=1&lan=1&r=10&p=0
-WAYBACK_CONSTANT = 'http://web.archive.org/web/20211111052556/{url}'
-GOOGLE_CONSTANT = "http://www.google.com/search?q=site:"
 HEADER_ = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.116 Safari/537.36'}
 STORY_PAGE_CONSTANT = 'https://archiveofourown.org{url}?view_adult=true">Proceed'
-#?view_adult=true">Proceed'
 STORY_INDEX_CONSTANT = "https://archiveofourown.org{url}/navigate"
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Shingeki no Kyojin | Attack on Titan/works?page={}'
 
