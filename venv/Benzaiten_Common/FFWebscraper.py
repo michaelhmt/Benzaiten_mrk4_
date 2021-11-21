@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# coding=utf8
 #site packages
 import requests
 from selenium import webdriver
@@ -212,7 +213,7 @@ class root_page(object):
         if story_Language != 'English':
             return "<_STORY NOT IN ENGLISH_>"
 
-        current_chapters = int(chapters.split("/")[0])
+        current_chapters = chapters.split("/")[0]
 
         story_metaData_Object["Language"] = story_Language
         story_metaData_Object["Chapters"] = current_chapters
@@ -277,7 +278,7 @@ class root_page(object):
         for chapter in chapter_index:
             print("----------------------------------------------")
             print("Starting ingest of chapter {}".format(count))
-            chapters[count] = self.ingest_chapter(chapter)
+            chapters[str(count)] = self.ingest_chapter(chapter)
             print("Finished ingest of chapter {}".format(count))
             count += 1
 

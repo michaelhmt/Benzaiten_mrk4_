@@ -1,3 +1,4 @@
+# coding=utf8
 #project imports
 from FFWebscraper import root_page
 from DataBase import Database_Class
