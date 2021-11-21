@@ -38,8 +38,10 @@ def iterate(page_to_start_with, limt=None, add_to_db = True):
     for page in range(limt):
         print("ingesting page {} of {}".format(current_page, limt))
         ingest(current_page,add_to_db= add_to_db)
+        print("----------------------------------------------------")
         print("finished ingesting page {}".format(current_page))
-        current_page = + 1
+        print("----------------------------------------------------")
+        current_page =+ 1
 
 
 iterate(1,limt=4, add_to_db=True)

@@ -96,7 +96,7 @@ class root_page(object):
 
 
 
-        for story in story_list:
+        for count, story in enumerate(story_list):
             story_object = {}
             story_metadata = self.get_Story_meta_data(story)
             story_object['MetaData'] = story_metadata
@@ -112,6 +112,7 @@ class root_page(object):
             print("Starting ingest of {title}, it has {ch} chapters, estimated to take {time}".format(title=story_metadata['Title'],
                                                                                                             ch=story_metadata['Chapters'],
                                                                                                             time=Time_to_complete))
+            print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
             story_content = self.ingest_story(story_metadata['Link'])
             print("----------Finished Ingest----------------")
             story_object['Content'] = story_content
