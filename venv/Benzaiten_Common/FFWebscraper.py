@@ -20,6 +20,13 @@ SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Shingeki no Kyojin | Att
 DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
 
 
+#TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page
+#TODO find a way to compress the content strings a bit they are hefy
+#TODO remove html formatting maybe replace with string formatting
+#TODO move the constants to a seprate file and make them moduluar
+
+#TODO God I want a UI for this with a buildt in console readout ideally
+
 
 #.encode('utf-8')
 
