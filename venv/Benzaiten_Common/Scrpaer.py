@@ -14,6 +14,11 @@ def ingest(search_page_to_ingest, add_to_db=True):
 
     story_batch = ingestor.ingest_searchpage(search_page_to_ingest)
     if add_to_db:
+        print("-----story Batch: ", story_batch)
+        if len(story_batch) <= 0:
+            print("*** story batch is empty, skipping to next page ***")
+            return
+
         database.add_to_database(story_batch, 'collectedData') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
 
 def iterate(page_to_start_with, limt=None, add_to_db = True):
@@ -44,5 +49,5 @@ def iterate(page_to_start_with, limt=None, add_to_db = True):
         current_page += 1
 
 
-iterate(1,limt=5, add_to_db=True)
+iterate(12,limt=17, add_to_db=True)
 
