@@ -41,7 +41,7 @@ def iterate(page_to_start_with, limt=None, add_to_db = True):
         print("----------------------------------------------------")
         print("finished ingesting page {}".format(current_page))
         print("----------------------------------------------------")
-        current_page =+ 1
+        current_page += 1
 
 
 iterate(1,limt=5, add_to_db=True)
