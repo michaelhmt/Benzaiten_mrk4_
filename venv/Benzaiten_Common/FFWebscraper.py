@@ -121,17 +121,17 @@ class root_page(object):
             print(story_metadata)
 
             if story_metadata == '<_STORY NOT IN ENGLISH_>':
-                Print("\n-------------------------------------------")
+                print("\n-------------------------------------------")
                 print("story is not in English, moving onto next one")
-                Print("\n-------------------------------------------")
+                print("\n-------------------------------------------")
                 continue
 
             metadata_log = self.check_ingested_log(story_metadata)
 
             if metadata_log == False:
-                Print("\n-------------------------------------------")
+                print("\n-------------------------------------------")
                 print("Story has already been Ingested, skipping")
-                Print("\n-------------------------------------------")
+                print("\n-------------------------------------------")
                 continue
 
             Time_to_complete = estimate(story_metadata['Chapters'])
