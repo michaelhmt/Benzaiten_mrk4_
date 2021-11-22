@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import os
+import json
 from bs4 import BeautifulSoup
 
 #buildt in
@@ -18,6 +19,7 @@ STORY_INDEX_CONSTANT = "https://archiveofourown.org{url}/navigate"
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Shingeki no Kyojin | Attack on Titan/works?page={}'
 
 DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
+INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log.json'
 
 
 #TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page
@@ -26,7 +28,7 @@ DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you
 #TODO move the constants to a seprate file and make them moduluar
 
 #TODO God I want a UI for this with a buildt in console readout ideally
-
+#TODO maybe take another look at that all page thing be nice to just requst one page per story
 
 #.encode('utf-8')
 
@@ -37,11 +39,19 @@ class root_page(object):
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
         """
+        self.ingested_log = self.open_ingested_log()
+
         self.delay = delay
         self.root_url = url
         self.root = self.get_page(self.root_url)
         self.root_soup = BeautifulSoup(self.root.content, 'html.parser')
         self.limt = goto
+
+    def open_ingested_log(self):
+        file = open(INGESTED_LOG)
+        data = json.load(file)
+        file.close()
+        return data
 
     def ingest(self, search_page_to_ingest):
         """
@@ -111,7 +121,17 @@ class root_page(object):
             print(story_metadata)
 
             if story_metadata == '<_STORY NOT IN ENGLISH_>':
+                Print("\n-------------------------------------------")
                 print("story is not in English, moving onto next one")
+                Print("\n-------------------------------------------")
+                continue
+
+            metadata_log = self.check_ingested_log(story_metadata)
+
+            if metadata_log == False:
+                Print("\n-------------------------------------------")
+                print("Story has already been Ingested, skipping")
+                Print("\n-------------------------------------------")
                 continue
 
             Time_to_complete = estimate(story_metadata['Chapters'])
@@ -226,7 +246,48 @@ class root_page(object):
         story_metaData_Object["Language"] = story_Language
         story_metaData_Object["Chapters"] = current_chapters
 
+
         return story_metaData_Object
+
+    def check_ingested_log(self, metadata):
+
+        try:
+            if metadata['Title'] in self.ingested_log['Title'] and metadata['Link'] in self.ingested_log['Link']:
+                #if thease vals exist in our log already we must have ingested this tory already
+                return False
+            else:
+                if metadata['Link'] == None:
+                    #This is bad metadata
+                    print("Bad metadata retrived, not adding to log")
+                    return False
+
+                metadata_to_submit = []
+
+                metadata_to_submit.append(metadata['Author'])
+                metadata_to_submit.append(metadata['Link'])
+                metadata_to_submit.append(metadata['Title'])
+
+                self.add_to_ingested_log(metadata_to_submit)
+                return True
+
+
+        except IndexError as e:
+            print('could open the meta data dict or maybe the log dict got {}'.format(e))
+
+
+    def add_to_ingested_log(self, metadata_to_add):
+        """
+        give this function a list with with [Author, link, Title]
+        :param metadata_to_add:
+        :return:
+        """
+        with open(INGESTED_LOG, 'r+' ) as i_log:
+            current_data = json.load(i_log)
+            current_data['Author'].append(metadata_to_add[0])
+            current_data['Link'].append(metadata_to_add[1])
+            current_data['Title'].append(metadata_to_add[2])
+            i_log.seek(0)
+            json.dump(current_data, i_log, indent=4)
 
     def Story_index(self, link):
         """
