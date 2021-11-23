@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
 #site packages
+import sys
+import zlib
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -22,12 +24,12 @@ DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you
 INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log.json'
 
 
-#TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page
+#TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
 #TODO find a way to compress the content strings a bit they are hefy
 #TODO remove html formatting maybe replace with string formatting
 #TODO move the constants to a seprate file and make them moduluar
 
-#TODO God I want a UI for this with a buildt in console readout ideally
+#TODO God I want a UI for this with a buildt in console readout ideally -Working on it
 #TODO maybe take another look at that all page thing be nice to just requst one page per story
 
 #.encode('utf-8')
@@ -330,7 +332,14 @@ class root_page(object):
             if len(text) > 35:
                 print("sample")
                 print(text[0:34])
-            chapter_contents.append(text)
+
+
+            print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
+
+            compressed = zlib.compress(text.encode()) #basic string compression
+            print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
+
+            chapter_contents.append(compressed)
         return chapter_contents
 
     def ingest_story(self, link):
