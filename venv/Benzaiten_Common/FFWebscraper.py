@@ -28,7 +28,7 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log
 
 
 #TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
-#TODO find a way to compress the content strings a bit they are hefy
+#TODO find a way to compress the content strings a bit they are hefy -DONE
 #TODO remove html formatting maybe replace with string formatting
 #TODO move the constants to a seprate file and make them moduluar
 
