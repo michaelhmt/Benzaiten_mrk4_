@@ -3,14 +3,14 @@
 from FFWebscraper import root_page
 from DataBase import Database_Class
 
-SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Shingeki no Kyojin | Attack on Titan/works?page={}'
+SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
 
 
 def ingest(search_page_to_ingest, add_to_db=True):
     starturl = SEARCHPAGE_CONSTANT.format(search_page_to_ingest)
 
     ingestor = root_page(starturl)
-    database = Database_Class('aot_ff_data')
+    database = Database_Class('HP_ff_data')
 
     story_batch = ingestor.ingest_searchpage(search_page_to_ingest)
     if add_to_db:
