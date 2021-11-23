@@ -339,10 +339,10 @@ class root_page(object):
 
             print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
 
-            compressed = zlib.compress(text.encode()) #basic string compression
-            print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
+            # compressed = zlib.compress(text.encode()) #basic string compression
+            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
 
-            chapter_contents.append(compressed)
+            chapter_contents.append(text)
         return chapter_contents
 
     def ingest_story(self, link):
