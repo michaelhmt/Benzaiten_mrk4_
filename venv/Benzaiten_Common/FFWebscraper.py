@@ -383,12 +383,15 @@ class root_page(object):
 
         story_soup = BeautifulSoup(full_story_page, 'html.parser')
         #print(story_soup)
-        chapters_lst = story_soup.find_all('div', class_='chapter')
+        chapters_lst = story_soup.find_all(lambda tag: tag.name == 'div' and tag.get('class') == ['chapter'])
+        # ^ will explicitly match a div that has the class name chapter not just chapter in its name
 
-        for count, chapter in enumerate(chapters_lst):
+        count = 1
+        print("Chapter lst len: ", len(chapters_lst))
+        for chapter in chapters_lst:
             chapter_contents = []
 
-            chapter_num = count + 1
+            chapter_num = count
             heading = "Chapter {}".format(chapter_num)
             chapter_contents.append(heading)
             text = chapter.get_text()
@@ -405,6 +408,8 @@ class root_page(object):
 
             chapter_contents.append(text)
             chapters[str(chapter_num)] = text
+            count += 1
+
 
         return chapters
 
@@ -439,6 +444,14 @@ class root_page(object):
 
 
 # test_inget = root_page('https://archiveofourown.org/tags/Ao%20no%20Exorcist%20%7C%20Blue%20Exorcist/works?page=0')
-# test_inget.ingest_full_story('/works/35197330')
+# Test_story = test_inget.ingest_full_story('/works/34883230')
+#
+# print("Len: ", len(Test_story))
+# print("Type: ", type(Test_story))
+#
+# print("Len: ", len(Test_story['3']))
+# print("Type: ", type(Test_story['3']))
+
+
 # #/works/29832528
 # #/works/35197330
