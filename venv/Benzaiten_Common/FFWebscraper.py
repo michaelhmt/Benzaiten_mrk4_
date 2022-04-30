@@ -11,11 +11,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-import os
-import json
+
 from bs4 import BeautifulSoup
 
 #buildt in
+import os
+import json
 import time
 
 #Harry%20Potter%20-%20J*d*%20K*d*%20Rowling
@@ -38,10 +39,10 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log
 #TODO find a way to compress the content strings a bit they are hefy -Nope needs to be re thought mongo does'nt like it
 #TODO remove html formatting maybe replace with string formatting
 #TODO move the constants to a seprate file and make them moduluar
-#TODO should maybe only write to the log when after it acutally adds to the db, encase that fails, Maybe it should query the DB so its always 1:1
+#TODO should maybe only write to the log after it acutally adds to the db, encase that fails, Maybe it should query the DB so its always 1:1
 
 #TODO God I want a UI for this with a buildt in console readout ideally -Working on it
-#TODO maybe take another look at that all page thing be nice to just requst one page per story
+#TODO maybe take another look at that all page thing be nice to just requst one page per story -DONE
 
 #.encode('utf-8')
 
@@ -191,9 +192,6 @@ class root_page(object):
             print("\n--------------\n",story)
 
         return story_Batch
-
-
-
 
 
     def get_page(self, url):

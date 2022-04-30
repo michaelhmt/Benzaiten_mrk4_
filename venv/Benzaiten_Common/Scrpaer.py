@@ -9,7 +9,7 @@ SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d
 def ingest(search_page_to_ingest, add_to_db=True):
     starturl = SEARCHPAGE_CONSTANT.format(search_page_to_ingest)
 
-    ingestor = root_page(starturl, delay=15)
+    ingestor = root_page(starturl, delay=17)
     database = Database_Class('HP_ff_data')
 
     story_batch = ingestor.ingest_searchpage(search_page_to_ingest)
@@ -49,5 +49,5 @@ def iterate(page_to_start_with, limt=None, add_to_db = True):
         current_page += 1
 
 
-iterate(1,limt=18, add_to_db=True)
+iterate(20,limt=40, add_to_db=True)
 

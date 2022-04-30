@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>894</width>
+    <height>594</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Benzaiten Data collect</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow{
+background: rgb(80, 80, 80);
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGroupBox{
+background-color: rgb(80, 80, 80);
+}
+QGroupBox::title{
+color: rgb(220, 220, 220)
+}</string>
+      </property>
+      <property name="title">
+       <string>Collected Data</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QTreeWidget" name="collection_display">
+         <property name="styleSheet">
+          <string notr="true">QTreeWidget{
+background: rgb(120, 120, 120)
+}</string>
+         </property>
+         <property name="headerHidden">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="styleSheet">
+       <string notr="true">QTabWidget::pane { /* The tab widget frame */
+   background: rgb(80, 80, 80);
+}
+
+QTabBar::tab {
+    background: rgb(80, 80, 80);
+    border: 2px solid #C4C4C3;
+    border-bottom-color: rgb(80, 80, 80);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+	title-color: rgb(220, 220, 220);
+    min-width: 8ex;
+    padding: 2px;
+}
+
+QTabBar::tab::title {
+	color: rgb(220, 220, 220);
+}
+
+
+QTabBar::tab::selected {
+    background: rgb(100, 100, 100);
+}</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="ingest_ctrls">
+       <property name="minimumSize">
+        <size>
+         <width>411</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QWidget{
+	background: rgb(80, 80, 80)
+}</string>
+       </property>
+       <attribute name="title">
+        <string>Ingestion controls</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="target_url_label">
+            <property name="styleSheet">
+             <string notr="true">QLabel{
+	color: rgb(220, 220, 220);
+}</string>
+            </property>
+            <property name="text">
+             <string>Target URL:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="target_url">
+            <property name="styleSheet">
+             <string notr="true">QLineEdit{
+	color: rgb(220, 220, 220)
+}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="collection_number_label">
+            <property name="styleSheet">
+             <string notr="true">QLabel{
+	color: rgb(220, 220, 220);
+}</string>
+            </property>
+            <property name="text">
+             <string>Number to collect(if 0 will go until stopped:)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="number_to_collect">
+            <property name="contextMenuPolicy">
+             <enum>Qt::PreventContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QSpinBox{
+	color: rgb(220, 220, 220);
+	background: rgb(120, 120, 120);
+}
+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="add_to_data_base">
+            <property name="styleSheet">
+             <string notr="true">QCheckBox{
+	color: rgb(220, 220, 220);
+}</string>
+            </property>
+            <property name="text">
+             <string>Add to DataBase</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox{
+background-color: rgb(80, 80, 80);
+}
+QGroupBox::title{
+color: rgb(220, 220, 220)
+}</string>
+          </property>
+          <property name="title">
+           <string>Console Log</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QTextBrowser" name="console_output">
+             <property name="styleSheet">
+              <string notr="true">QTextBroser{
+	color: rgb(200, 200, 200);
+	background: rgb(110, 110, 110);
+}</string>
+             </property>
+             <property name="html">
+              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="start_collection">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton{
+	color: rgb(220, 220, 220);
+	background: rgb(100, 100, 100);
+}</string>
+          </property>
+          <property name="text">
+           <string>Start collection</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="data_info">
+       <attribute name="title">
+        <string>Data Info</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>894</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
