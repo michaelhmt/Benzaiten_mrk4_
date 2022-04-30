@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
 #site packages
-import sys
 import zlib
 import requests
 from selenium import webdriver
@@ -11,11 +10,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
 from bs4 import BeautifulSoup
 
 #buildt in
 import os
+import sys
 import json
 import time
 

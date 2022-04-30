@@ -162,10 +162,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.start_collection.clicked.connect(self.test)
 
-    def weee():
-        print("wooooo")
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
