@@ -194,8 +194,6 @@ class root_page(object):
             story_metadata = self.get_Story_meta_data(story)
             story_object['MetaData'] = story_metadata
 
-            print(story_metadata)
-
             if story_metadata == '<_STORY NOT IN ENGLISH_>':
                 print("\n-------------------------------------------")
                 print("story is not in English, moving onto next one")
@@ -221,7 +219,7 @@ class root_page(object):
             story_Batch.append(story_object)
 
         for story in story_Batch:
-            print("\n--------------\n",story)
+            print("\n--------------\n")
 
         return story_Batch
 
@@ -424,7 +422,8 @@ class root_page(object):
                 if self.debug_mode:
                     print("******: printing a sample")
                 print("sample")
-                print(text[0:180])
+                text_sample = text.encode('utf-8')
+                print(text_sample[0:180])
 
 
             print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
@@ -466,7 +465,8 @@ class root_page(object):
                 if self.debug_mode:
                     print("******: printning a chapter sample from a full story")
                 print("sample")
-                print(text[8:88])
+                text_sample = text.encode(encoding='utf-8')
+                print(text[0:120])
 
 
             print("Size of text uncompressed........: {}".format(sys.getsizeof(text)))
@@ -490,8 +490,6 @@ class root_page(object):
         :param link:
         :return:
         """
-        if self.debug_mode:
-            print("******: How did you get here?")
 
         # OLD CODE for ingesting one chapter at a time might be useful to keep if we need it
         # chapters = {}

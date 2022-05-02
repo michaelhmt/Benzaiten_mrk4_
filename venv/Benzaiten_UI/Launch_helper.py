@@ -2,6 +2,7 @@ print("Doing imports and setting env:...")
 import sys
 import os
 import json
+import traceback
 
 def set_env():
     current_location = os.getcwd()
@@ -31,8 +32,8 @@ def launch_scraper_via_ui(log_path):
                             add_to_db=int(launch_args['add_to_db']),
                             searchPage_constant=launch_args['target_url'],
                             debug_mode=launch_args['debug'])
-        except Exception as e:
-            print("Could not start Web scraper, got the following error: \n", e)
+        except Exception:
+            print("Could not start Web scraper, got the following error: \n", traceback.format_exc())
 
 # if __name__ == '__main__':
 #     launch_scraper_via_ui()
