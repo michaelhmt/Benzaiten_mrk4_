@@ -6,7 +6,7 @@ from DataBase import Database_Class
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
 
 
-def ingest(search_page_to_ingest, add_to_db=True):
+def ingest(search_page_to_ingest, add_to_db=True, using_UI=False):
     starturl = SEARCHPAGE_CONSTANT.format(search_page_to_ingest)
 
     ingestor = root_page(starturl, delay=17)
@@ -21,7 +21,7 @@ def ingest(search_page_to_ingest, add_to_db=True):
 
         database.add_to_database(story_batch, 'collectedData') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
 
-def iterate(page_to_start_with, limt=None, add_to_db = True):
+def iterate(page_to_start_with, limt=None, add_to_db=True, using_UI=False):
     print("starting up.....")
     print("checking {}".format(SEARCHPAGE_CONSTANT.format(1)))
     ingestor_check = root_page(SEARCHPAGE_CONSTANT.format(1)) #used to check how many pages we have as we always know we will have page 1
