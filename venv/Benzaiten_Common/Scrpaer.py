@@ -25,7 +25,6 @@ def ingest(search_page_to_ingest,
     if add_to_db:
         if debug_mode:
             print("******: adding to database")
-        print("-----story Batch: ", story_batch)
         if len(story_batch) <= 0:
             print("*** story batch is empty, skipping to next page ***")
             return
