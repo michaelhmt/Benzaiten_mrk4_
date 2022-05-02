@@ -4,7 +4,7 @@ import pymongo
 
 class Database_Class(object):
     def __init__(self, databasename):
-        self.client = pymongo.MongoClient("mongodb+srv://Asalem:z7$d8BsHeTeL&#Ynq@cluster0.wn9uy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+        self.client = pymongo.MongoClient("mongodb+srv://Asalem:z7$d8BsHeTeL&#Ynq@cluster0.wn9uy.mongodb.net/training_data?retryWrites=true&w=majority")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
 

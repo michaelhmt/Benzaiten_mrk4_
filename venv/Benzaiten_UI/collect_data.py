@@ -15,7 +15,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(894, 594)
-        MainWindow.setAutoFillBackground(True)
+        MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "background: rgb(80, 80, 80);\n"
 "}")
@@ -118,6 +118,25 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.add_to_data_base.setObjectName("add_to_data_base")
         self.horizontalLayout_2.addWidget(self.add_to_data_base)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.label = QtWidgets.QLabel(self.ingest_ctrls)
+        self.label.setStyleSheet("QLabel{\n"
+"    color: rgb(220, 220, 220);\n"
+"}")
+        self.label.setObjectName("label")
+        self.horizontalLayout_3.addWidget(self.label)
+        self.spinBox = QtWidgets.QSpinBox(self.ingest_ctrls)
+        self.spinBox.setStyleSheet("QSpinBox{\n"
+"    color: rgb(220, 220, 220);\n"
+"    background: rgb(120, 120, 120);\n"
+"}\n"
+"")
+        self.spinBox.setObjectName("spinBox")
+        self.horizontalLayout_3.addWidget(self.spinBox)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.groupBox_2 = QtWidgets.QGroupBox(self.ingest_ctrls)
         self.groupBox_2.setStyleSheet("QGroupBox{\n"
 "background-color: rgb(80, 80, 80);\n"
@@ -129,10 +148,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox_2)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.console_output = QtWidgets.QTextBrowser(self.groupBox_2)
-        self.console_output.setStyleSheet("QTextBroser{\n"
+        self.console_output.setStyleSheet("QTextBrowser{\n"
 "    color: rgb(200, 200, 200);\n"
-"    background: rgb(110, 110, 110);\n"
+"    background: rgb(30, 30, 30);\n"
 "}")
+        self.console_output.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        self.console_output.setOverwriteMode(False)
+        self.console_output.setTabStopWidth(90)
+        self.console_output.setTabStopDistance(90.0)
+        self.console_output.setCursorWidth(1)
         self.console_output.setObjectName("console_output")
         self.verticalLayout_3.addWidget(self.console_output)
         self.verticalLayout_2.addWidget(self.groupBox_2)
@@ -162,8 +186,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Benzaiten Data collect"))
@@ -171,6 +193,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.target_url_label.setText(_translate("MainWindow", "Target URL:"))
         self.collection_number_label.setText(_translate("MainWindow", "Number to collect(if 0 will go until stopped:)"))
         self.add_to_data_base.setText(_translate("MainWindow", "Add to DataBase"))
+        self.label.setText(_translate("MainWindow", "Page to start Collection at:"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Console Log"))
         self.console_output.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
@@ -182,13 +205,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.data_info), _translate("MainWindow", "Data Info"))
 
 
-def launch_ui_empty():
-
-        import sys
-        app = QtWidgets.QApplication(sys.argv)
-        MainWindow = QtWidgets.QMainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(MainWindow)
-        MainWindow.show()
-        sys.exit(app.exec_())
-
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

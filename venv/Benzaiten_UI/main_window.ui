@@ -14,7 +14,7 @@
    <string>Benzaiten Data collect</string>
   </property>
   <property name="autoFillBackground">
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow{
@@ -193,6 +193,46 @@ QTabBar::tab::selected {
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="styleSheet">
+             <string notr="true">QLabel{
+	color: rgb(220, 220, 220);
+}</string>
+            </property>
+            <property name="text">
+             <string>Page to start Collection at:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox">
+            <property name="styleSheet">
+             <string notr="true">QSpinBox{
+	color: rgb(220, 220, 220);
+	background: rgb(120, 120, 120);
+}
+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="styleSheet">
            <string notr="true">QGroupBox{
@@ -209,10 +249,13 @@ color: rgb(220, 220, 220)
            <item>
             <widget class="QTextBrowser" name="console_output">
              <property name="styleSheet">
-              <string notr="true">QTextBroser{
+              <string notr="true">QTextBrowser{
 	color: rgb(200, 200, 200);
-	background: rgb(110, 110, 110);
+	background: rgb(30, 30, 30);
 }</string>
+             </property>
+             <property name="lineWrapMode">
+              <enum>QTextEdit::NoWrap</enum>
              </property>
              <property name="html">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -220,6 +263,18 @@ color: rgb(220, 220, 220)
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="overwriteMode">
+              <bool>false</bool>
+             </property>
+             <property name="tabStopWidth">
+              <number>90</number>
+             </property>
+             <property name="tabStopDistance">
+              <double>90.000000000000000</double>
+             </property>
+             <property name="cursorWidth">
+              <number>1</number>
              </property>
             </widget>
            </item>

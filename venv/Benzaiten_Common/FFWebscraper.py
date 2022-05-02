@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 from bs4 import BeautifulSoup
 
@@ -31,7 +32,7 @@ VIEW_ALL_CONSTANT ="https://archiveofourown.org{url}?view_adult=true&view_full_w
 COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 'view_adult', 'path': '/', 'secure': False, 'value': 'true'}
 
 DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
-INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log.json'
+INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
 
 
 #TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
@@ -47,13 +48,16 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log
 
 class root_page(object):
 
-    def __init__(self, url, goto=None, delay=9):
+    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
         """
+        print("Starting Ingest Class..")
         self.ingested_log = self.open_ingested_log()
 
+
+        self.search_page_constant = search_page_constant
         self.delay = delay
         self.root_url = url
         self.root = self.get_page(self.root_url)
@@ -62,9 +66,18 @@ class root_page(object):
         self.start_browser()
 
     def open_ingested_log(self):
-        file = open(INGESTED_LOG)
-        data = json.load(file)
-        file.close()
+        # make the log if it does'nt exist
+        if not os.path.exists(INGESTED_LOG):
+            with open(INGESTED_LOG, 'a+') as i_log:
+                blank_log ={"Author":[],
+                            "Link": [],
+                            "Title": []}
+                json.dump(blank_log, i_log, indent=4)
+
+        # get the log data
+        with open(INGESTED_LOG) as log_file:
+            data = json.load(log_file)
+
         return data
 
     def start_browser(self):
@@ -74,7 +87,7 @@ class root_page(object):
         chrome_options.add_argument("--window-size=1024x1400")
         s=Service(DRIVER_PATH)
 
-        self.driver = webdriver.Chrome(options=chrome_options, service=s)
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         time.sleep(self.delay)
         page = self.driver.get('https://archiveofourown.org/works/29832528?view_full_work=true') #know link for triggering adult contant
 
@@ -131,7 +144,7 @@ class root_page(object):
         """
         story_Batch = []
 
-        searchpage_url = SEARCHPAGE_CONSTANT.format(pagenum)
+        searchpage_url = self.search_page_constant.format(pagenum)
         searcpage = self.get_page(searchpage_url)
 
         searcpage_soup = BeautifulSoup(searcpage.content, 'html.parser')
@@ -360,7 +373,7 @@ class root_page(object):
             text = phargraph.get_text()
             if len(text) > 35:
                 print("sample")
-                print(text[0:34])
+                print(text[0:180])
 
 
             print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
