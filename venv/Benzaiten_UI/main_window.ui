@@ -282,6 +282,13 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="chkbx_debug_mode">
+          <property name="text">
+           <string>Debug Mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="start_collection">
           <property name="minimumSize">
            <size>

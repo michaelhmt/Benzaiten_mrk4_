@@ -48,12 +48,13 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
 
 class root_page(object):
 
-    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT):
+    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT, debug_mode=False):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
         """
         print("Starting Ingest Class..")
+        self.debug_mode = debug_mode
         self.ingested_log = self.open_ingested_log()
 
 
@@ -68,6 +69,8 @@ class root_page(object):
     def open_ingested_log(self):
         # make the log if it does'nt exist
         if not os.path.exists(INGESTED_LOG):
+            if self.debug_mode:
+                print("******: making log")
             with open(INGESTED_LOG, 'a+') as i_log:
                 blank_log ={"Author":[],
                             "Link": [],
@@ -81,17 +84,25 @@ class root_page(object):
         return data
 
     def start_browser(self):
+        if self.debug_mode:
+            print("******: starting headles chrom browser")
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         #chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--window-size=1024x1400")
         s=Service(DRIVER_PATH)
+        if self.debug_mode:
+            print("******: created browser options")
 
+        if self.debug_mode:
+            print("******: starting driver")
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         time.sleep(self.delay)
         page = self.driver.get('https://archiveofourown.org/works/29832528?view_full_work=true') #know link for triggering adult contant
 
         wait = WebDriverWait(self.driver, 10)
+        if self.debug_mode:
+            print("******: auto completeing page")
         time.sleep(5) #box takes a second or 2 to appear
 
         I_agree = wait.until(EC.presence_of_element_located((By.ID, 'tos_agree')))
@@ -108,6 +119,9 @@ class root_page(object):
         """
         assume root is popoulated and also grab the current page  and decides how far we go
         This one might be moved to the scraper class so we can add to the DB
+
+        THIS IS REDUNDANT
+
         :return:
         """
         urlsplit = self.root_url.split('=')
@@ -143,11 +157,15 @@ class root_page(object):
         :return:
         """
         story_Batch = []
+        if self.debug_mode:
+            print("******: LOOKING AT SEARCH PAGE")
 
         searchpage_url = self.search_page_constant.format(pagenum)
         searcpage = self.get_page(searchpage_url)
 
         searcpage_soup = BeautifulSoup(searcpage.content, 'html.parser')
+        if self.debug_mode:
+            print("******: making search page soup")
         story_list = searcpage_soup.find_all(role='article')
 
         def estimate(chapters):
@@ -170,6 +188,8 @@ class root_page(object):
 
 
         for count, story in enumerate(story_list):
+            if self.debug_mode:
+                print("******: in search page iteration loop")
             story_object = {}
             story_metadata = self.get_Story_meta_data(story)
             story_object['MetaData'] = story_metadata
@@ -212,6 +232,9 @@ class root_page(object):
         :param url:
         :return:
         """
+        if self.debug_mode:
+            print("******: getting url: {}".format(url))
+
         page = requests.get(url, headers=HEADER_)
         time.sleep(self.delay)
         return page
@@ -222,6 +245,9 @@ class root_page(object):
         :param url:
         :return:
         """
+
+        if self.debug_mode:
+            print("******: getting a dynamic page")
         time.sleep(self.delay)
         page = self.driver.get(url)
         #print(driver.page_source)
@@ -232,6 +258,9 @@ class root_page(object):
         Gets the amount of pages within the given search
         :return:
         """
+        if self.debug_mode:
+            print("******: getting the lenght of the browse page")
+
         navigation_bar = self.root_soup.find_all(title='pagination')[0]
         buttons = navigation_bar.find_all('a')
         page_nums =[]
@@ -252,6 +281,9 @@ class root_page(object):
         :param article_card:
         :return:
         """
+        if self.debug_mode:
+            print("******: finding the story metadata")
+
         story_metaData_Object = {}
 
         title = article_card.find_all(class_='heading')
@@ -272,6 +304,9 @@ class root_page(object):
                     #Not the title header
                     continue
 
+        if self.debug_mode:
+            print("******: getting the static metadata tags")
+
         Tags = article_card.find_all(class_='tag')
         story_metaData_Object["Tags"] = [tag.get_text() for tag in Tags]
 
@@ -286,6 +321,8 @@ class root_page(object):
             return "<_STORY NOT IN ENGLISH_>"
 
         current_chapters = chapters.split("/")[0]
+        if self.debug_mode:
+            print("******: buiulding finial metadata")
 
         story_metaData_Object["Language"] = story_Language
         story_metaData_Object["Chapters"] = current_chapters
@@ -294,6 +331,8 @@ class root_page(object):
         return story_metaData_Object
 
     def check_ingested_log(self, metadata):
+        if self.debug_mode:
+            print("******: checking ingested log")
 
         try:
             if metadata['Title'] in self.ingested_log['Title'] and metadata['Link'] in self.ingested_log['Link']:
@@ -325,6 +364,10 @@ class root_page(object):
         :param metadata_to_add:
         :return:
         """
+        if self.debug_mode:
+            print("******: addign story to ingested log")
+
+
         with open(INGESTED_LOG, 'r+' ) as i_log:
             current_data = json.load(i_log)
             current_data['Author'].append(metadata_to_add[0])
@@ -339,6 +382,9 @@ class root_page(object):
         :param link:
         :return: a lst of link to chapters for that story
         """
+        if self.debug_mode:
+            print("******: getting index of a story")
+
         chapter_link_lst = []
 
         index_page = self.get_page(STORY_INDEX_CONSTANT.format(url=link))
@@ -359,6 +405,9 @@ class root_page(object):
         :param link:
         :return:
         """
+        if self.debug_mode:
+            print("******: ingesting a chapter")
+
         chapter_contents = []
 
         chapterlink = STORY_PAGE_CONSTANT.format(url=link)
@@ -372,6 +421,8 @@ class root_page(object):
         for phargraph in chapters:
             text = phargraph.get_text()
             if len(text) > 35:
+                if self.debug_mode:
+                    print("******: printing a sample")
                 print("sample")
                 print(text[0:180])
 
@@ -385,6 +436,8 @@ class root_page(object):
         return chapter_contents
 
     def ingest_full_story(self, link):
+        if self.debug_mode:
+            print("******: ingesting a story")
         chapters = {}
 
         full_story_link = VIEW_ALL_CONSTANT.format(url=link)
@@ -399,6 +452,9 @@ class root_page(object):
         count = 1
         print("Chapter lst len: ", len(chapters_lst))
         for chapter in chapters_lst:
+            if self.debug_mode:
+                print("******: getting al the chapters")
+
             chapter_contents = []
 
             chapter_num = count
@@ -407,6 +463,8 @@ class root_page(object):
             text = chapter.get_text()
 
             if len(text) > 90:
+                if self.debug_mode:
+                    print("******: printning a chapter sample from a full story")
                 print("sample")
                 print(text[8:88])
 
@@ -432,6 +490,9 @@ class root_page(object):
         :param link:
         :return:
         """
+        if self.debug_mode:
+            print("******: How did you get here?")
+
         # OLD CODE for ingesting one chapter at a time might be useful to keep if we need it
         # chapters = {}
         # chapter_index = self.Story_index(link)
