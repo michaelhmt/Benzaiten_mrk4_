@@ -81,11 +81,13 @@ class configured_collect_data(data_ui):
         page_limt = self.number_to_collect.value()
         add_to_db = self.add_to_data_base.checkState()
         page_to_start_at = self.spinBox.value()
+        debug_mode = self.chkbx_debug_mode.checkState()
 
         state_dict ={"target_url": target_url,
                      "page_limt": page_limt,
                      "add_to_db": add_to_db,
-                     "page_to_start": page_to_start_at}
+                     "page_to_start": page_to_start_at,
+                     "debug": debug_mode}
 
         print("Thhis is state_dict: ", state_dict)
         return state_dict

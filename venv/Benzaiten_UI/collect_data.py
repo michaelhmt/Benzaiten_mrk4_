@@ -160,6 +160,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.console_output.setObjectName("console_output")
         self.verticalLayout_3.addWidget(self.console_output)
         self.verticalLayout_2.addWidget(self.groupBox_2)
+        self.chkbx_debug_mode = QtWidgets.QCheckBox(self.ingest_ctrls)
+        self.chkbx_debug_mode.setObjectName("chkbx_debug_mode")
+        self.verticalLayout_2.addWidget(self.chkbx_debug_mode)
         self.start_collection = QtWidgets.QPushButton(self.ingest_ctrls)
         self.start_collection.setMinimumSize(QtCore.QSize(0, 60))
         self.start_collection.setStyleSheet("QPushButton{\n"
@@ -200,6 +203,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+        self.chkbx_debug_mode.setText(_translate("MainWindow", "Debug Mode"))
         self.start_collection.setText(_translate("MainWindow", "Start collection"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ingest_ctrls), _translate("MainWindow", "Ingestion controls"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.data_info), _translate("MainWindow", "Data Info"))
