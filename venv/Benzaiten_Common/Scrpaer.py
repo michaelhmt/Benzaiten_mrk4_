@@ -16,7 +16,7 @@ def ingest(search_page_to_ingest,
     starturl = searchPage_constant.format(search_page_to_ingest)
 
     ingestor = root_page(starturl, delay=17, search_page_constant=searchPage_constant, debug_mode=debug_mode)
-    database = Database_Class('mlp_fan_fiction_data')
+    database = Database_Class('ff_training_data')
 
     if debug_mode:
         print("******: Ingest  and database classes created")
@@ -29,7 +29,7 @@ def ingest(search_page_to_ingest,
             print("*** story batch is empty, skipping to next page ***")
             return
 
-        database.add_to_database(story_batch, 'collectedData') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
+        database.add_to_database(story_batch, 'mlp_data') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
 
 def iterate(page_to_start_with,
             limt=None, add_to_db=True,
