@@ -1,57 +1,108 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
 #site packages
+import zlib
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-import os
-import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+
 from bs4 import BeautifulSoup
 
 #buildt in
+import os
+import sys
+import json
 import time
+
+#Harry%20Potter%20-%20J*d*%20K*d*%20Rowling
+#Shingeki no Kyojin | Attack on Titan
 
 
 HEADER_ = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.116 Safari/537.36'}
 STORY_PAGE_CONSTANT = 'https://archiveofourown.org{url}?view_adult=true">Proceed'
 STORY_INDEX_CONSTANT = "https://archiveofourown.org{url}/navigate"
-SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Shingeki no Kyojin | Attack on Titan/works?page={}'
+SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
+VIEW_ALL_CONSTANT ="https://archiveofourown.org{url}?view_adult=true&view_full_work=true" #MIGHT THROW AN ERROR WITH MATURE CONTENT
+
+COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 'view_adult', 'path': '/', 'secure': False, 'value': 'true'}
 
 DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
-INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log.json'
+INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
 
 
-#TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page
-#TODO find a way to compress the content strings a bit they are hefy
+#TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
+#TODO find a way to compress the content strings a bit they are hefy -Nope needs to be re thought mongo does'nt like it
 #TODO remove html formatting maybe replace with string formatting
 #TODO move the constants to a seprate file and make them moduluar
+#TODO should maybe only write to the log after it acutally adds to the db, encase that fails, Maybe it should query the DB so its always 1:1
 
-#TODO God I want a UI for this with a buildt in console readout ideally
-#TODO maybe take another look at that all page thing be nice to just requst one page per story
+#TODO God I want a UI for this with a buildt in console readout ideally -Working on it
+#TODO maybe take another look at that all page thing be nice to just requst one page per story -DONE
 
 #.encode('utf-8')
 
 class root_page(object):
 
-    def __init__(self, url, goto=None, delay=9):
+    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
         """
+        print("Starting Ingest Class..")
         self.ingested_log = self.open_ingested_log()
 
+
+        self.search_page_constant = search_page_constant
         self.delay = delay
         self.root_url = url
         self.root = self.get_page(self.root_url)
         self.root_soup = BeautifulSoup(self.root.content, 'html.parser')
         self.limt = goto
+        self.start_browser()
 
     def open_ingested_log(self):
-        file = open(INGESTED_LOG)
-        data = json.load(file)
-        file.close()
+        # make the log if it does'nt exist
+        if not os.path.exists(INGESTED_LOG):
+            with open(INGESTED_LOG, 'a+') as i_log:
+                blank_log ={"Author":[],
+                            "Link": [],
+                            "Title": []}
+                json.dump(blank_log, i_log, indent=4)
+
+        # get the log data
+        with open(INGESTED_LOG) as log_file:
+            data = json.load(log_file)
+
         return data
+
+    def start_browser(self):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        #chrome_options.add_experimental_option("detach", True)
+        chrome_options.add_argument("--window-size=1024x1400")
+        s=Service(DRIVER_PATH)
+
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        time.sleep(self.delay)
+        page = self.driver.get('https://archiveofourown.org/works/29832528?view_full_work=true') #know link for triggering adult contant
+
+        wait = WebDriverWait(self.driver, 10)
+        time.sleep(5) #box takes a second or 2 to appear
+
+        I_agree = wait.until(EC.presence_of_element_located((By.ID, 'tos_agree')))
+        I_agree.click()
+
+        I_agree_button = wait.until(EC.presence_of_element_located((By.ID, 'accept_tos')))
+        I_agree_button.click()
+
+        proceed = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Proceed")))
+        proceed.click()
+        # now we can query any page without derailing the entire script
 
     def ingest(self, search_page_to_ingest):
         """
@@ -93,13 +144,18 @@ class root_page(object):
         """
         story_Batch = []
 
-        searchpage_url = SEARCHPAGE_CONSTANT.format(pagenum)
+        searchpage_url = self.search_page_constant.format(pagenum)
         searcpage = self.get_page(searchpage_url)
 
         searcpage_soup = BeautifulSoup(searcpage.content, 'html.parser')
         story_list = searcpage_soup.find_all(role='article')
 
         def estimate(chapters):
+            """
+            Not used any more used to estimate how long it would take to ingest a story based on the number of chapters
+            :param chapters:
+            :return:
+            """
             try:
                 chapters_num = int(chapters)
             except ValueError:
@@ -136,11 +192,9 @@ class root_page(object):
 
             Time_to_complete = estimate(story_metadata['Chapters'])
             print(Time_to_complete)
-            print("Starting ingest of {title}, it has {ch} chapters, estimated to take {time}".format(title=story_metadata['Title'],
-                                                                                                            ch=story_metadata['Chapters'],
-                                                                                                            time=Time_to_complete))
+            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'],ch=story_metadata['Chapters'],))
             print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
-            story_content = self.ingest_story(story_metadata['Link'])
+            story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'])
             print("----------Finished Ingest----------------")
             story_object['Content'] = story_content
 
@@ -150,9 +204,6 @@ class root_page(object):
             print("\n--------------\n",story)
 
         return story_Batch
-
-
-
 
 
     def get_page(self, url):
@@ -171,17 +222,10 @@ class root_page(object):
         :param url:
         :return:
         """
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        #chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_argument("--window-size=1024x1400")
-        s=Service(DRIVER_PATH)
-
-        driver = webdriver.Chrome(options=chrome_options, service=s)
         time.sleep(self.delay)
-        page = driver.get(url)
+        page = self.driver.get(url)
         #print(driver.page_source)
-        return driver.page_source
+        return self.driver.page_source
 
     def get_browse_page_lenght(self):
         """
@@ -329,28 +373,95 @@ class root_page(object):
             text = phargraph.get_text()
             if len(text) > 35:
                 print("sample")
-                print(text[0:34])
+                print(text[0:180])
+
+
+            print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
+
+            # compressed = zlib.compress(text.encode()) #basic string compression
+            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
+
             chapter_contents.append(text)
         return chapter_contents
 
-    def ingest_story(self, link):
+    def ingest_full_story(self, link):
+        chapters = {}
+
+        full_story_link = VIEW_ALL_CONSTANT.format(url=link)
+        print(full_story_link)
+        full_story_page = self.get_dynamic_page(full_story_link)
+
+        story_soup = BeautifulSoup(full_story_page, 'html.parser')
+        #print(story_soup)
+        chapters_lst = story_soup.find_all(lambda tag: tag.name == 'div' and tag.get('class') == ['chapter'])
+        # ^ will explicitly match a div that has the class name chapter not just chapter in its name
+
+        count = 1
+        print("Chapter lst len: ", len(chapters_lst))
+        for chapter in chapters_lst:
+            chapter_contents = []
+
+            chapter_num = count
+            heading = "Chapter {}".format(chapter_num)
+            chapter_contents.append(heading)
+            text = chapter.get_text()
+
+            if len(text) > 90:
+                print("sample")
+                print(text[8:88])
+
+
+            print("Size of text uncompressed........: {}".format(sys.getsizeof(text)))
+
+            # compressed = zlib.compress(text.encode()) #basic string compression
+            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
+
+            chapter_contents.append(text)
+            chapters[str(chapter_num)] = text
+            count += 1
+
+
+        return chapters
+
+
+
+    def ingest_story(self, link, name):
         """
         give a link from metadata object, will get a lst of chpater link and get the strings of the chapters
         returns a dict with int as keys for the chpater number. starting at 1
         :param link:
         :return:
         """
-        chapters = {}
-        chapter_index = self.Story_index(link)
+        # OLD CODE for ingesting one chapter at a time might be useful to keep if we need it
+        # chapters = {}
+        # chapter_index = self.Story_index(link)
+        #
+        # count = 1
+        # for chapter in chapter_index:
+        #     print("----------------------------------------------")
+        #     print("Starting ingest of chapter {}".format(count))
+        #     chapters[str(count)] = self.ingest_chapter(chapter)
+        #     print("Finished ingest of chapter {}".format(count))
+        #     count += 1
 
-        count = 1
-        for chapter in chapter_index:
-            print("----------------------------------------------")
-            print("Starting ingest of chapter {}".format(count))
-            chapters[str(count)] = self.ingest_chapter(chapter)
-            print("Finished ingest of chapter {}".format(count))
-            count += 1
-
+        print("----------------------------------------------")
+        print("Starting ingest of {} and its chapters".format(name))
+        chapters = self.ingest_full_story(link)
+        print("Finished ingest of {} and its chapters".format(name))
 
         return chapters
 
+
+
+# test_inget = root_page('https://archiveofourown.org/tags/Ao%20no%20Exorcist%20%7C%20Blue%20Exorcist/works?page=0')
+# Test_story = test_inget.ingest_full_story('/works/34883230')
+#
+# print("Len: ", len(Test_story))
+# print("Type: ", type(Test_story))
+#
+# print("Len: ", len(Test_story['3']))
+# print("Type: ", type(Test_story['3']))
+
+
+# #/works/29832528
+# #/works/35197330

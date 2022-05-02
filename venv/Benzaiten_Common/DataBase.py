@@ -4,7 +4,7 @@ import pymongo
 
 class Database_Class(object):
     def __init__(self, databasename):
-        self.client = pymongo.MongoClient("mongodb+srv://Asalem:z7$d8BsHeTeL&#Ynq@cluster0.wn9uy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+        self.client = pymongo.MongoClient("mongodb+srv://Asalem:z7$d8BsHeTeL&#Ynq@cluster0.wn9uy.mongodb.net/training_data?retryWrites=true&w=majority")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
 
@@ -17,8 +17,20 @@ class Database_Class(object):
 
         database_collection = self.database[targetCollection]
 
-        if type(itemToAdd) == list and len(itemToAdd) > 1:
+        if type(itemToAdd) == list and len(itemToAdd) > 0:
             # assume it a list of dicts so add many to Db
+            if len(itemToAdd) == 1:
+                single = itemToAdd[0]
+                try:
+                    add_op = database_collection.insert_one(single)
+                    if print_IDs:
+                        print(add_op.inserted_ids)
+                    return True
+                except Exception as e:
+                    print("*************************************************")
+                    print("well that did'nt work, got this error{}".format(e))
+                    print("*************************************************")
+
             try:
                 add_op = database_collection.insert_many(itemToAdd)
                 if print_IDs:
