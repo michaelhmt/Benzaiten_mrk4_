@@ -41,7 +41,7 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
 #TODO move the constants to a seprate file and make them moduluar
 #TODO should maybe only write to the log after it acutally adds to the db, encase that fails, Maybe it should query the DB so its always 1:1
 
-#TODO God I want a UI for this with a buildt in console readout ideally -Working on it
+#TODO God I want a UI for this with a buildt in console readout ideally -DONE
 #TODO maybe take another look at that all page thing be nice to just requst one page per story -DONE
 
 #.encode('utf-8')
