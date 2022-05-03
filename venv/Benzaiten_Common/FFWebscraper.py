@@ -210,7 +210,8 @@ class root_page(object):
 
             Time_to_complete = estimate(story_metadata['Chapters'])
             print(Time_to_complete)
-            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'],ch=story_metadata['Chapters'],))
+            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'].encode('utf-8'),
+                                                                            ch=story_metadata['Chapters'],))
             print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
             story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'])
             print("----------Finished Ingest----------------")
@@ -466,7 +467,7 @@ class root_page(object):
                     print("******: printning a chapter sample from a full story")
                 print("sample")
                 text_sample = text.encode(encoding='utf-8')
-                print(text[0:120])
+                print(text_sample[0:120])
 
 
             print("Size of text uncompressed........: {}".format(sys.getsizeof(text)))
@@ -504,9 +505,9 @@ class root_page(object):
         #     count += 1
 
         print("----------------------------------------------")
-        print("Starting ingest of {} and its chapters".format(name))
+        print("Starting ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
         chapters = self.ingest_full_story(link)
-        print("Finished ingest of {} and its chapters".format(name))
+        print("Finished ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
 
         return chapters
 
