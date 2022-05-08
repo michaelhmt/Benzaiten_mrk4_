@@ -5,14 +5,13 @@ import json
 import traceback
 
 def set_env():
-    current_location = os.getcwd()
-    package_folder = os.path.dirname(current_location)
-    common_folder = os.path.join(package_folder, "Benzaiten_Common")
-    sys.path.append("E:\\Python\\Benzaiten_mrk4\\venv\\Lib\\site-packages")
-    sys.path.append(package_folder)
-    sys.path.append(common_folder)
-
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
 set_env()
+import Site_custom
+env_object = Site_custom.env()
+
 import Scrpaer
 
 def launch_scraper_via_ui(log_path):
