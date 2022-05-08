@@ -37,9 +37,11 @@ class configured_collect_data(data_ui):
 
         self.temp_file = temp_log_write_location = os.path.join(os.getcwd(), 'temp.json')
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
+        self.console_output.installEventFilter(self)
 
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
+        self.clear_output.clicked.connect(lambda: self.console_output.clear())
 
     def initui(self):
         # if you get an error here make sure data_ui inherits from QtWidgets.QMainWindow
@@ -118,6 +120,10 @@ class configured_collect_data(data_ui):
             if current_text.startswith(start_constant) and current_text.endswith(end_constant):
                 print("Url passed check")
                 return current_text + "?page={}"
+
+
+
+
 
 
 def launch_ui():

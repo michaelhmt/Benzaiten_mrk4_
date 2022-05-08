@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>894</width>
-    <height>594</height>
+    <width>1226</width>
+    <height>828</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -260,6 +260,9 @@ color: rgb(220, 220, 220)
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
             <widget class="QTextBrowser" name="console_output">
+             <property name="contextMenuPolicy">
+              <enum>Qt::NoContextMenu</enum>
+             </property>
              <property name="styleSheet">
               <string notr="true">QTextBrowser{
 	color: rgb(200, 200, 200);
@@ -294,11 +297,28 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="chkbx_debug_mode">
-          <property name="text">
-           <string>Debug Mode</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="chkbx_debug_mode">
+            <property name="text">
+             <string>Debug Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clear_output">
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+	color: rgb(220, 220, 220);
+	background: rgb(100, 100, 100);
+}</string>
+            </property>
+            <property name="text">
+             <string>Clear Output</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QPushButton" name="start_collection">
@@ -335,7 +355,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>894</width>
+     <width>1226</width>
      <height>22</height>
     </rect>
    </property>
