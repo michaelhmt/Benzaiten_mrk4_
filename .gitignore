@@ -7,3 +7,4 @@ venv/Benzaiten_UI/temp.json
 *.pyc
 venv/Benzaiten_Common/__pycache__/FFWebscraper.cpython-39.pyc
 venv/Benzaiten_Common/__pycache__/DataBase.cpython-39.pyc
+venv/Benzaiten_UI/launch_ui.bat
