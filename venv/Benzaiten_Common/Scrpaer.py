@@ -31,7 +31,7 @@ def ingest(search_page_to_ingest,
         print("******: starting iteration")
     starturl = searchPage_constant.format(search_page_to_ingest)
 
-    ingestor = root_page(starturl, delay=8, search_page_constant=searchPage_constant, debug_mode=debug_mode)
+    ingestor = root_page(starturl, delay=25, search_page_constant=searchPage_constant, debug_mode=debug_mode)
     database = Database_Class('ff_training_data')
 
     if debug_mode:
