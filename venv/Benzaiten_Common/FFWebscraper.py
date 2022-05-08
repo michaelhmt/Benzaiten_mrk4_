@@ -59,7 +59,10 @@ INGESTED_LOG = env_object.ingested_log_path
 
 class root_page(object):
 
-    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT, debug_mode=False):
+    def __init__(self, url, goto=None, delay=9,
+                 search_page_constant=SEARCHPAGE_CONSTANT,
+                 debug_mode=False, data_base_class=None,
+                 add_single_to_db=False):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
@@ -67,7 +70,8 @@ class root_page(object):
         print("Starting Ingest Class..")
         self.debug_mode = debug_mode
         self.ingested_log = self.open_ingested_log()
-
+        self.data_base = data_base_class
+        self.add_singles = add_single_to_db
 
         self.search_page_constant = search_page_constant
         self.delay = delay
@@ -228,7 +232,12 @@ class root_page(object):
             print("----------Finished Ingest----------------")
             story_object['Content'] = story_content
 
-            story_Batch.append(story_object)
+            if self.add_singles and self.data_base:
+                self.data_base.add_to_database(itemToAdd=story_object,
+                                               targetCollection='Hololive_data',
+                                               print_IDs=True)
+            else:
+                story_Batch.append(story_object)
 
         for story in story_Batch:
             print("\n--------------\n")

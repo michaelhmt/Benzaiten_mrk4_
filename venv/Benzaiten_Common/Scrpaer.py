@@ -27,12 +27,18 @@ def ingest(search_page_to_ingest,
            using_UI=False,
            searchPage_constant=SEARCHPAGE_CONSTANT,
            debug_mode=False):
+
     if debug_mode:
         print("******: starting iteration")
     starturl = searchPage_constant.format(search_page_to_ingest)
-
-    ingestor = root_page(starturl, delay=25, search_page_constant=searchPage_constant, debug_mode=debug_mode)
     database = Database_Class('ff_training_data')
+
+    ingestor = root_page(starturl,
+                         delay=25,
+                         search_page_constant=searchPage_constant,
+                         debug_mode=debug_mode,
+                         data_base_class=database,
+                         add_single_to_db=add_to_db)
 
     if debug_mode:
         print("******: Ingest  and database classes created")
@@ -42,14 +48,14 @@ def ingest(search_page_to_ingest,
         print("******: Writing story batch to a dump file")
         write_test_sample(story_batch)
 
-    if add_to_db:
-        if debug_mode:
-            print("******: adding to database")
-        if len(story_batch) <= 0:
-            print("*** story batch is empty, skipping to next page ***")
-            return
-
-        database.add_to_database(story_batch, 'Hololive_data') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
+    # if add_to_db:
+    #     if debug_mode:
+    #         print("******: adding to database")
+    #     if len(story_batch) <= 0:
+    #         print("*** story batch is empty, skipping to next page ***")
+    #         return
+    #
+    #     database.add_to_database(story_batch, 'Hololive_data') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
 
 def iterate(page_to_start_with,
             limt=None, add_to_db=True,
@@ -84,6 +90,7 @@ def iterate(page_to_start_with,
         print("finished ingesting page {}".format(current_page))
         print("----------------------------------------------------")
         current_page += 1
+    print("*"*50, "\nAll target data was collected!\n", "*"*50) # should maybe report any errors we caught here
 
 
 def write_test_sample(story_batch):

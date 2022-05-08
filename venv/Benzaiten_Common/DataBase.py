@@ -49,8 +49,8 @@ class Database_Class(object):
             try:
                 print("Adding one dict")
                 add_op = database_collection.insert_one(itemToAdd)
-                #if print_IDs:
-                    #print(add_op.inserted_ids)
+                if print_IDs:
+                    print(add_op.inserted_id)
                 print("sucessfuly added one item the database")
                 return True
             except Exception as e:
