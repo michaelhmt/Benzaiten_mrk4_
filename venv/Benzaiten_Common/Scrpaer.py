@@ -1,4 +1,19 @@
 # coding=utf8
+
+# buildt in
+import os
+import sys
+
+# env settings
+def set_env():
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+set_env()
+import Site_custom
+env_object = Site_custom.env()
+
+print(sys.path)
+
 #project imports
 from FFWebscraper import root_page
 from DataBase import Database_Class

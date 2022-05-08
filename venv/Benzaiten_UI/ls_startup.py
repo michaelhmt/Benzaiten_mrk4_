@@ -9,14 +9,12 @@ import time
 EXAMPLE_URL = "https://archiveofourown.org//tags//-------//works?page={}"
 
 def set_env():
-    current_location = os.getcwd()
-    package_folder = os.path.dirname(current_location)
-    common_folder = os.path.join(package_folder, "Benzaiten_Common")
-    sys.path.append("E:\\Python\\Benzaiten_mrk4\\venv\\Lib\\site-packages")
-    sys.path.append(package_folder)
-    sys.path.append(common_folder)
-
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
 set_env()
+import Site_custom
+env_object = Site_custom.env()
 
 from collect_data import Ui_MainWindow as data_ui
 from PyQt5 import QtCore, QtGui, QtWidgets

@@ -1,5 +1,22 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
+
+#buildt in
+import os
+import sys
+import json
+import time
+
+
+# env settings
+def set_env():
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
+set_env()
+import Site_custom
+env_object = Site_custom.env()
+
 #site packages
 import zlib
 import requests
@@ -13,12 +30,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from bs4 import BeautifulSoup
 
-#buildt in
-import os
-import sys
-import json
-import time
-
 #Harry%20Potter%20-%20J*d*%20K*d*%20Rowling
 #Shingeki no Kyojin | Attack on Titan
 
@@ -31,8 +42,8 @@ VIEW_ALL_CONSTANT ="https://archiveofourown.org{url}?view_adult=true&view_full_w
 
 COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 'view_adult', 'path': '/', 'secure': False, 'value': 'true'}
 
-DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
-INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
+DRIVER_PATH = env_object.chrome_driver_path
+INGESTED_LOG = env_object.ingested_log_path
 
 
 #TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
