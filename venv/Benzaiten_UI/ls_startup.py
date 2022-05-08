@@ -100,14 +100,24 @@ class configured_collect_data(data_ui):
 
     def query_search_page(self):
         current_text = self.target_url.text()
-        start_constant = 'https://archiveofourown.org/tags/'
-        end_constant = '/works'
+        if self.ignore_name_check:
+            # For if we have a custom group of tags that we want to collect
+            # ideally make sure this ends in &page= so we can add the .fomrat
+            # make sure &page= is ideally not anywhere else in the url
 
-        print("Start is good: ", current_text.startswith(start_constant),
-              "end is good: ",current_text.endswith(end_constant))
-        if current_text.startswith(start_constant) and current_text.endswith(end_constant):
-            print("Url passed check")
-            return current_text + "?page={}"
+            if "&page=" not in current_text:
+                print("Not page url found, I hope you know what your doing!")
+            return current_text + "{}"
+
+        else:
+            start_constant = 'https://archiveofourown.org/tags/'
+            end_constant = '/works'
+
+            print("Start is good: ", current_text.startswith(start_constant),
+                  "end is good: ",current_text.endswith(end_constant))
+            if current_text.startswith(start_constant) and current_text.endswith(end_constant):
+                print("Url passed check")
+                return current_text + "?page={}"
 
 
 def launch_ui():
