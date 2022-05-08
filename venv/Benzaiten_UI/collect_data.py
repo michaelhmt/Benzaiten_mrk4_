@@ -92,6 +92,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.target_url.setObjectName("target_url")
         self.horizontalLayout.addWidget(self.target_url)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.ignore_name_check = QtWidgets.QCheckBox(self.ingest_ctrls)
+        self.ignore_name_check.setStyleSheet("QCheckBox{\n"
+"    color: rgb(220, 220, 220);\n"
+"}")
+        self.ignore_name_check.setObjectName("ignore_name_check")
+        self.verticalLayout_2.addWidget(self.ignore_name_check)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.collection_number_label = QtWidgets.QLabel(self.ingest_ctrls)
@@ -194,6 +200,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Benzaiten Data collect"))
         self.groupBox.setTitle(_translate("MainWindow", "Collected Data"))
         self.target_url_label.setText(_translate("MainWindow", "Target URL:"))
+        self.ignore_name_check.setText(_translate("MainWindow", "Ignore name check, only do this if you know what your doing!"))
         self.collection_number_label.setText(_translate("MainWindow", "Number to collect(if 0 will go until stopped:)"))
         self.add_to_data_base.setText(_translate("MainWindow", "Add to DataBase"))
         self.label.setText(_translate("MainWindow", "Page to start Collection at:"))
