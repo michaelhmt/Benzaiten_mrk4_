@@ -282,7 +282,13 @@ class root_page(object):
                 pagenum = int(urls_split[-1])
                 page_nums.append(pagenum)
             except:
-                print("could not get page num from {}".format(url))
+                print("could not get page num from {} URL, trying text instead".format(url))
+                button_text = str(button.get_text())
+                if button_text.isnumeric():
+                    page_nums.append(int(button_text))
+                else:
+                    print("Could not get page num from button")
+
         return max(page_nums)
 
     def get_Story_meta_data(self, article_card):
