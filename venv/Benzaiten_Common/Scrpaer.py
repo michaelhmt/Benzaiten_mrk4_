@@ -3,6 +3,7 @@
 # buildt in
 import os
 import sys
+import json
 
 # env settings
 def set_env():
@@ -19,7 +20,7 @@ from FFWebscraper import root_page
 from DataBase import Database_Class
 
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
-
+TEST_DUMP_FILE = os.path.join(os.getcwd(), "sample_log.json")
 
 def ingest(search_page_to_ingest,
            add_to_db=True,
@@ -30,13 +31,17 @@ def ingest(search_page_to_ingest,
         print("******: starting iteration")
     starturl = searchPage_constant.format(search_page_to_ingest)
 
-    ingestor = root_page(starturl, delay=17, search_page_constant=searchPage_constant, debug_mode=debug_mode)
+    ingestor = root_page(starturl, delay=8, search_page_constant=searchPage_constant, debug_mode=debug_mode)
     database = Database_Class('ff_training_data')
 
     if debug_mode:
         print("******: Ingest  and database classes created")
 
     story_batch = ingestor.ingest_searchpage(search_page_to_ingest)
+    if debug_mode:
+        print("******: Writing story batch to a dump file")
+        write_test_sample(story_batch)
+
     if add_to_db:
         if debug_mode:
             print("******: adding to database")
@@ -44,7 +49,7 @@ def ingest(search_page_to_ingest,
             print("*** story batch is empty, skipping to next page ***")
             return
 
-        database.add_to_database(story_batch, 'mlp_data') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
+        database.add_to_database(story_batch, 'Hololive_data') #cannot add an empty batch to the DB, which we might do with the logging feature, fix this bug
 
 def iterate(page_to_start_with,
             limt=None, add_to_db=True,
@@ -79,6 +84,13 @@ def iterate(page_to_start_with,
         print("finished ingesting page {}".format(current_page))
         print("----------------------------------------------------")
         current_page += 1
+
+
+def write_test_sample(story_batch):
+    if not os.path.exists(TEST_DUMP_FILE):
+        with open(TEST_DUMP_FILE, 'a+') as i_log:
+            json.dump(story_batch, i_log, indent=4)
+
 
 
 #iterate(20,limt=40, add_to_db=True)

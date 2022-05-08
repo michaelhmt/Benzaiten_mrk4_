@@ -6,7 +6,7 @@ class env(object):
     def __init__(self):
         self.env_dir = os.path.dirname(pathlib.Path(__file__).resolve())
         self.chrome_driver_path = os.path.join(self.env_dir, "chromedriver.exe")
-        self.ingested_log_path = os.path.join(self.env_dir, "Benzaiten_Common\\Ingested_Log_{Fandom_Name}.json")
+        self.ingested_log_path = os.path.join(self.env_dir, "Benzaiten_Common\\Ingested_Log.json")
         self.set_env_paths()
 
 
