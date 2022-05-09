@@ -113,6 +113,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "    background: rgb(120, 120, 120);\n"
 "}\n"
 "")
+        self.number_to_collect.setMaximum(9999)
         self.number_to_collect.setObjectName("number_to_collect")
         self.horizontalLayout_2.addWidget(self.number_to_collect)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -138,6 +139,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "    background: rgb(120, 120, 120);\n"
 "}\n"
 "")
+        self.spinBox.setMaximum(9999)
         self.spinBox.setObjectName("spinBox")
         self.horizontalLayout_3.addWidget(self.spinBox)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
