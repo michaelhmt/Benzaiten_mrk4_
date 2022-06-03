@@ -138,6 +138,31 @@ QTabBar::tab::selected {
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="target_url_label_2">
+            <property name="styleSheet">
+             <string notr="true">QLabel{
+	color: rgb(220, 220, 220);
+}</string>
+            </property>
+            <property name="text">
+             <string>Target collection:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="target_db_col">
+            <property name="styleSheet">
+             <string notr="true">QLineEdit{
+	color: rgb(220, 220, 220)
+}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QComboBox" name="Ingest_mode">
