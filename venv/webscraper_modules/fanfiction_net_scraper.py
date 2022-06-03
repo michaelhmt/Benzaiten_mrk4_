@@ -5,6 +5,7 @@ import json
 import time
 import copy
 import re
+import datetime
 from pprint import pprint
 
 # env settings
@@ -27,15 +28,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium_stealth import stealth
+import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 
 # Benzaiten packages
 from scraper_baseclass import BaseScraperClass
 
-SEARCHPAGE_CONSTANT = "https://www.fanfiction.net/anime/Digimon/?&srt=1&r=103&p={}"
+INGESTED_LOG = env_object.ingested_log_path
 DRIVER_PATH = env_object.chrome_driver_path
+
+SEARCHPAGE_CONSTANT = "https://www.fanfiction.net/anime/Digimon/?&srt=1&r=103&p={}"
 METADATA_SKIP = ['Rated:', "Reviews:", "Favs:", "Follows:", "Updated:", "Published:"]
 METADATA_TAGS = ['Rated:',"Chapters:", "Words:" , "Reviews:", "Favs:", "Follows:", "Updated:", "Published:"]
+URL_CONSTANT = "https://www.fanfiction.net"
 
 class FanfictionNetScraper(BaseScraperClass):
 
@@ -57,6 +62,8 @@ class FanfictionNetScraper(BaseScraperClass):
         self.data_base = data_base_class
         self.add_singles = add_single_to_db
 
+        self.ingested_log = self.open_ingested_log()
+
 
         self.start_browser()
         #print(self.get_browse_page_lenght())
@@ -72,6 +79,7 @@ class FanfictionNetScraper(BaseScraperClass):
             print("******: getting url: {}".format(url))
 
         page = self.driver.get(url)
+
         time.sleep(self.delay)
 
         return self.driver.page_source
@@ -80,7 +88,7 @@ class FanfictionNetScraper(BaseScraperClass):
         if self.debug_mode:
             print("******: starting headles chrom browser")
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
         #chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--window-size=10x10")
         s=Service(DRIVER_PATH)
@@ -89,27 +97,66 @@ class FanfictionNetScraper(BaseScraperClass):
 
         if self.debug_mode:
             print("******: starting driver")
-        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-
+        #self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        self.driver = uc.Chrome(use_subprocess=True, options=chrome_options)
         # make us able to get past Cloudflare whilie in Headless mode
-        stealth(self.driver,
-                platform="Win32",
-                fix_hairline=True)
+        # stealth(self.driver,
+        #         platform="Win32",
+        #         fix_hairline=True)
+
+        self.driver.get("https://www.fanfiction.net")
+
+        wait = WebDriverWait(self.driver, 10)
+        if self.debug_mode:
+            print("******: auto completeing page")
+        time.sleep(5) #box takes a second or 2 to appear
+
+        cookie_agree_xpath = '//*[@id="cookie_notice"]/div/table/tbody/tr/td[2]/div'
+
+        I_agree = wait.until(EC.presence_of_element_located((By.XPATH, cookie_agree_xpath)))
+        I_agree.click()
 
         return True
 
     def ingest_searchpage(self, search_page):
-        pass
+        story_Batch = []
         search_page_soup = BeautifulSoup(self.get_page(self.root_url.format(search_page)), 'html.parser')
 
         stories = search_page_soup.find_all('div', style="min-height:77px;border-bottom:1px #cdcdcd solid;")
 
         for index, story in enumerate(stories):
             story_object = {}
-            story_meta_data = self.get_story_metadata(story)
-            print(story_meta_data)
+            story_metadata = self.get_story_metadata(story)
+
+            if story_metadata == '<_STORY NOT IN ENGLISH_>':
+                print("\n-------------------------------------------")
+                print("story is not in English, moving onto next one")
+                print("\n-------------------------------------------")
+                continue
 
 
+
+            if not self.check_ingested_log(story_metadata):
+                print("\n-------------------------------------------")
+                print("Story has already been Ingested, skipping")
+                print("\n-------------------------------------------")
+                continue
+
+            story_object['MetaData'] = story_metadata
+
+            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'].encode('utf-8'),
+                                                                            ch=story_metadata['Chapters'],))
+            story_content = self.collect_story(story_metadata)
+            story_object['Content'] = story_content
+            print("Ingesting story {} of {} in current batch".format(index, len(stories)))
+
+            if self.add_singles and self.data_base:
+                self.data_base.add_to_database(itemToAdd=story_object,
+                                               targetCollection='Hololive_data',
+                                               print_IDs=True)
+            else:
+                story_Batch.append(story_object)
+        return story_Batch
 
     def get_browse_page_lenght(self):
         """
@@ -153,12 +200,13 @@ class FanfictionNetScraper(BaseScraperClass):
 
         # extract all the meta data tags
         metadata_elements = story_data.split("-")
-        for data in metadata_elements:
-            story_not_in_english = True
+        story_not_in_english = True
 
+        for data in metadata_elements:
             if data in METADATA_SKIP:
                 continue
-            if data == ' English ':
+            if 'English' in data:
+                print("story is in english")
                 story_not_in_english = False
             if "Chapters:" in data:
                 chapter_number = int(data.replace("Chapters: ", ""))
@@ -206,14 +254,32 @@ class FanfictionNetScraper(BaseScraperClass):
 
         return story_metadata_object
 
+    def collect_story(self, metadata):
+        # build url format string
+        story_object = {}
+
+        url_split = metadata['Link'].split("/")
+        story_chapter_amount = metadata['Chapters']
+
+        url_elements = [URL_CONSTANT, "s", url_split[2], "{}"]
+        story_url = "/".join(url_elements)
+
+        print("*"*30)
+        print("Starting collection, estimated time is {}".format(self.estimate_collection_time(story_chapter_amount)))
+        print("*" * 30)
+
+        for chapter in range(story_chapter_amount):
+            chapter_num = chapter+1
+            chapter_url = story_url.format(chapter_num)
+
+            chapter_soup = BeautifulSoup(self.get_page(chapter_url), 'html.parser')
+            chapter_content = chapter_soup.find_all('div',class_="storytext xcontrast_txt nocopy")[0].get_text()
+            story_object[str(chapter_num)] = chapter_content
+
+        return story_object
 
 
 
-
-scraper = FanfictionNetScraper("https://www.fanfiction.net/anime/Digimon/?&srt=1&r=103&p={}",
-                               goto=2,
-                               delay=15,
-                               search_page_constant=SEARCHPAGE_CONSTANT,
-                               debug_mode=True,
-                               data_base_class=None,
-                               add_single_to_db=False)
+    def estimate_collection_time(self, chapter_amount):
+        estimate_seconds = ((self.delay + 15) * chapter_amount)
+        return str(datetime.timedelta(seconds=estimate_seconds))
