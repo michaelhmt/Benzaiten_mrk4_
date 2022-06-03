@@ -28,7 +28,7 @@ class BaseScraperClass(object):
     def __init__(self, url, goto=None, delay=9,
                  search_page_constant="Not given",
                  debug_mode=False, data_base_class=None,
-                 add_single_to_db=False):
+                 add_single_to_db=False, target_col=None):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page

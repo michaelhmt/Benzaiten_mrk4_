@@ -7,6 +7,7 @@ class env(object):
         self.env_dir = os.path.dirname(pathlib.Path(__file__).resolve())
         self.chrome_driver_path = os.path.join(self.env_dir, "chromedriver.exe")
         self.ingested_log_path = os.path.join(self.env_dir, "Benzaiten_Common\\Ingested_Log.json")
+        self.config_path = os.path.join(self.env_dir, "config.json")
         self.set_env_paths()
 
 
@@ -19,6 +20,8 @@ class env(object):
         packages.append(os.path.join(self.env_dir, "Benzaiten_Common"))
         # ui folder
         packages.append(os.path.join(self.env_dir, "Benzaiten_UI"))
+        # webscrapers
+        packages.append(os.path.join(self.env_dir, "webscraper_modules"))
         print("**************\n This is packages", packages)
 
         sys_paths = [sys.path.append(package) for package in packages]

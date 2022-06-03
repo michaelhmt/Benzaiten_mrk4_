@@ -32,9 +32,10 @@ from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
 
 # this needs to match whats at the top of Scraper.py
 # really should be in a Json they both share
+conf_path = env_object.config_path
 
-config = {"FanFicNet": FanfictionNetScraper,
-          "ArchiveOfOurOwn": ArchiveOOO}
+with open(conf_path, "r") as config_file:
+    config = json.load(config_file)
 
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
@@ -46,6 +47,7 @@ class configured_collect_data(data_ui):
         self.temp_file = temp_log_write_location = os.path.join(os.getcwd(), 'temp.json')
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
         self.console_output.installEventFilter(self)
+        self.u_response = None
 
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
@@ -59,7 +61,7 @@ class configured_collect_data(data_ui):
         self.process.started.connect(lambda: self.start_collection.setEnabled(False))
         self.process.finished.connect(lambda: self.start_collection.setEnabled(True))
 
-        for website in config.keys():
+        for website in config['web_scrapers'].keys():
             self.Ingest_mode.addItem(website)
 
     def write_to_console(self):
@@ -74,6 +76,10 @@ class configured_collect_data(data_ui):
 
     def start_collection_function(self):
         script_launch_args = str(self.get_ui_state())
+
+        if not self.get_ui_state():
+            return
+
         log_path = str(self.temp_file)
         log_path = log_path.replace("\\", "/")
         self.write_to_log(script_launch_args)
@@ -89,18 +95,35 @@ class configured_collect_data(data_ui):
             print("Given Url is Invalid, ending")
             self.console_output.insertPlainText("Given Url is Invalid, ending\n")
             return
+
+
+
         page_limt = self.number_to_collect.value()
         add_to_db = self.add_to_data_base.checkState()
         page_to_start_at = self.spinBox.value()
         debug_mode = self.chkbx_debug_mode.checkState()
         website_mode = self.Ingest_mode.currentText()
 
+        if add_to_db:
+            if self.target_db_col.text() != "":
+                target_col_valid = self.check_collection(self.target_db_col.text())
+                if target_col_valid:
+                    target_collection = str(self.target_db_col.text())
+                else:
+                    print("stopping collection")
+                    return False
+            else:
+                print("No collection given")
+                return False
+
+
         state_dict ={"target_url": target_url,
                      "page_limt": page_limt,
                      "add_to_db": add_to_db,
                      "page_to_start": page_to_start_at,
                      "debug": debug_mode,
-                     "website_mode": website_mode}
+                     "website_mode": website_mode,
+                     "target_col": target_collection}
 
         print("Thhis is state_dict: ", state_dict)
         return state_dict
@@ -133,6 +156,32 @@ class configured_collect_data(data_ui):
             if current_text.startswith(start_constant) and current_text.endswith(end_constant):
                 print("Url passed check")
                 return current_text + "?page={}"
+
+    def check_collection(self, col_to_check):
+        collections_lst = config['database_collections']
+        if col_to_check not in collections_lst:
+            dialouge_window = QtWidgets.QMessageBox()
+
+            dialouge_window.setIcon(QMessageBox.Information)
+            dialouge_window.setText("The target collection does not yet exists in the DataBase.\n"
+                                    "Do you want to add it?")
+            dialouge_window.setInformativeText("This is the collection you are trying to add {} \n"
+                                               "Thease are the collections that already exist: \n {}".format(col_to_check,
+                                                                                                             "\n".join(collections_lst)))
+            dialouge_window.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            dialouge_window.buttonClicked.connect(self.response)
+
+            retval = dialouge_window.exec_()
+
+            if self.u_response == 'OK':
+                print("proceeding")
+                return True
+            elif self.u_response == 'Cancel':
+                return False
+
+
+    def response(self, i):
+        self.u_response = i.text()
 
 
 

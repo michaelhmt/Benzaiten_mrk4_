@@ -50,7 +50,8 @@ class FanfictionNetScraper(BaseScraperClass):
                  delay=9,
                  search_page_constant=SEARCHPAGE_CONSTANT,
                  debug_mode=False, data_base_class=None,
-                 add_single_to_db=False):
+                 add_single_to_db=False,
+                 target_col=None):
 
         super().__init__(url)
 
@@ -61,6 +62,7 @@ class FanfictionNetScraper(BaseScraperClass):
         self.debug_mode = debug_mode
         self.data_base = data_base_class
         self.add_singles = add_single_to_db
+        self.target_col = target_col
 
         self.ingested_log = self.open_ingested_log()
 
@@ -152,7 +154,7 @@ class FanfictionNetScraper(BaseScraperClass):
 
             if self.add_singles and self.data_base:
                 self.data_base.add_to_database(itemToAdd=story_object,
-                                               targetCollection='Hololive_data',
+                                               targetCollection=self.target_col,
                                                print_IDs=True)
             else:
                 story_Batch.append(story_object)
