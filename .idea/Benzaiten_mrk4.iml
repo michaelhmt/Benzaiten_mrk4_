@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/venv/Benzaiten_Common" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/venv/Benzaiten_UI" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/venv/webscraper_modules" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="inheritedJdk" />
