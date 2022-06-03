@@ -24,8 +24,10 @@ from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
 TEST_DUMP_FILE = os.path.join(os.getcwd(), "sample_log.json")
 
-config = {"FanFicNet": FanfictionNetScraper,
-          "ArchiveOfOurOwn": ArchiveOOO}
+conf_path = env_object.config_path
+
+with open(conf_path, "r") as config_file:
+    config = json.load(config_file)
 
 
 
@@ -53,11 +55,12 @@ def iterate(page_to_start_with,
             limt=None, add_to_db=True,
             using_UI=False,
             searchPage_constant=SEARCHPAGE_CONSTANT,
-            debug_mode=False):
+            debug_mode=False,
+            col=None):
 
     print("starting up.....")
     print("checking {}".format(searchPage_constant.format(1)))
-    web_scraper_class = config.get(web_scraper)
+    web_scraper_class = globals()[config['web_scrapers'].get(web_scraper)]
     if not web_scraper_class:
         print("No valid scraper set or it is misconfigured")
         return
@@ -68,7 +71,8 @@ def iterate(page_to_start_with,
                                            search_page_constant=searchPage_constant,
                                            debug_mode=debug_mode,
                                            data_base_class=database,
-                                           add_single_to_db=add_to_db) #used to check how many pages we have as we always know we will have page 1
+                                           add_single_to_db=add_to_db,
+                                           target_col=col) #used to check how many pages we have as we always know we will have page 1
 
     page_max = web_scraper_object.get_browse_page_lenght()
 

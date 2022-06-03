@@ -51,7 +51,7 @@ class ArchiveOOO(BaseScraperClass):
     def __init__(self, url, goto=None, delay=9,
                  search_page_constant=SEARCHPAGE_CONSTANT,
                  debug_mode=False, data_base_class=None,
-                 add_single_to_db=False):
+                 add_single_to_db=False, target_col=None):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
@@ -61,6 +61,7 @@ class ArchiveOOO(BaseScraperClass):
         self.ingested_log = self.open_ingested_log()
         self.data_base = data_base_class
         self.add_singles = add_single_to_db
+        self.target_col = target_col
 
         self.search_page_constant = search_page_constant
         self.delay = delay
@@ -206,7 +207,7 @@ class ArchiveOOO(BaseScraperClass):
 
             if self.add_singles and self.data_base:
                 self.data_base.add_to_database(itemToAdd=story_object,
-                                               targetCollection='Hololive_data',
+                                               targetCollection=self.target_col,
                                                print_IDs=True)
             else:
                 story_Batch.append(story_object)
