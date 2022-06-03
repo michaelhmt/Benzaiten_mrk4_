@@ -275,6 +275,7 @@ class FanfictionNetScraper(BaseScraperClass):
             chapter_soup = BeautifulSoup(self.get_page(chapter_url), 'html.parser')
             chapter_content = chapter_soup.find_all('div',class_="storytext xcontrast_txt nocopy")[0].get_text()
             story_object[str(chapter_num)] = chapter_content
+            print("--collected chapter {} of  {}".format(chapter_num, story_chapter_amount))
 
         return story_object
 
