@@ -27,6 +27,7 @@ def launch_scraper_via_ui(log_path):
         print("Launching web scraper...")
         try:
             Scrpaer.iterate(page_to_start_with=int(launch_args['page_to_start']),
+                            web_scraper=launch_args['website_mode'],
                             limt=int(launch_args['page_limt']),
                             add_to_db=int(launch_args['add_to_db']),
                             searchPage_constant=launch_args['target_url'],

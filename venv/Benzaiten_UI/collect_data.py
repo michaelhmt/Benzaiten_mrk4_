@@ -92,12 +92,22 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.target_url.setObjectName("target_url")
         self.horizontalLayout.addWidget(self.target_url)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.Ingest_mode = QtWidgets.QComboBox(self.ingest_ctrls)
+        self.Ingest_mode.setStyleSheet("QComboBox{\n"
+"color: rgb(220, 220, 220);\n"
+"background: rgb(120, 120, 120)\n"
+"}")
+        self.Ingest_mode.setObjectName("Ingest_mode")
+        self.horizontalLayout_5.addWidget(self.Ingest_mode)
         self.ignore_name_check = QtWidgets.QCheckBox(self.ingest_ctrls)
         self.ignore_name_check.setStyleSheet("QCheckBox{\n"
 "    color: rgb(220, 220, 220);\n"
 "}")
         self.ignore_name_check.setObjectName("ignore_name_check")
-        self.verticalLayout_2.addWidget(self.ignore_name_check)
+        self.horizontalLayout_5.addWidget(self.ignore_name_check)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.collection_number_label = QtWidgets.QLabel(self.ingest_ctrls)

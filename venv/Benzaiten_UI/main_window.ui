@@ -138,16 +138,30 @@ QTabBar::tab::selected {
          </layout>
         </item>
         <item>
-         <widget class="QCheckBox" name="ignore_name_check">
-          <property name="styleSheet">
-           <string notr="true">QCheckBox{
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QComboBox" name="Ingest_mode">
+            <property name="styleSheet">
+             <string notr="true">QComboBox{
+color: rgb(220, 220, 220);
+background: rgb(120, 120, 120)
+}</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ignore_name_check">
+            <property name="styleSheet">
+             <string notr="true">QCheckBox{
 	color: rgb(220, 220, 220);
 }</string>
-          </property>
-          <property name="text">
-           <string>Ignore name check, only do this if you know what your doing!</string>
-          </property>
-         </widget>
+            </property>
+            <property name="text">
+             <string>Ignore name check, only do this if you know what your doing!</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">

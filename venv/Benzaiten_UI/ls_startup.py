@@ -27,6 +27,14 @@ from PyQt5.QtCore import *
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 
+from webscraper_modules.archive_of_our_own import ArchiveOOO
+from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
+
+# this needs to match whats at the top of Scraper.py
+# really should be in a Json they both share
+
+config = {"FanFicNet": FanfictionNetScraper,
+          "ArchiveOfOurOwn": ArchiveOOO}
 
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
@@ -51,6 +59,9 @@ class configured_collect_data(data_ui):
         self.process.started.connect(lambda: self.start_collection.setEnabled(False))
         self.process.finished.connect(lambda: self.start_collection.setEnabled(True))
 
+        for website in config.keys():
+            self.Ingest_mode.addItem(website)
+
     def write_to_console(self):
         self.console_output.insertPlainText(self.process.readAll().data().decode("cp850"))
         try:
@@ -58,7 +69,7 @@ class configured_collect_data(data_ui):
             current_postion = self.console_output_scroll_bar.value()
             self.console_output_scroll_bar.setValue(current_postion + 100000)
         except:
-            # encase we have got a scroll bar yet
+            # encase we have'nt got a scroll bar yet
             pass
 
     def start_collection_function(self):
@@ -82,12 +93,14 @@ class configured_collect_data(data_ui):
         add_to_db = self.add_to_data_base.checkState()
         page_to_start_at = self.spinBox.value()
         debug_mode = self.chkbx_debug_mode.checkState()
+        website_mode = self.Ingest_mode.currentText()
 
         state_dict ={"target_url": target_url,
                      "page_limt": page_limt,
                      "add_to_db": add_to_db,
                      "page_to_start": page_to_start_at,
-                     "debug": debug_mode}
+                     "debug": debug_mode,
+                     "website_mode": website_mode}
 
         print("Thhis is state_dict: ", state_dict)
         return state_dict

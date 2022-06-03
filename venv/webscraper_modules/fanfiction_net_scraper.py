@@ -32,7 +32,7 @@ import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 
 # Benzaiten packages
-from scraper_baseclass import BaseScraperClass
+from webscraper_modules.scraper_baseclass import BaseScraperClass
 
 INGESTED_LOG = env_object.ingested_log_path
 DRIVER_PATH = env_object.chrome_driver_path
