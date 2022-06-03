@@ -106,17 +106,17 @@ class FanfictionNetScraper(BaseScraperClass):
         #         platform="Win32",
         #         fix_hairline=True)
 
-        self.driver.get("https://www.fanfiction.net")
-
-        wait = WebDriverWait(self.driver, 10)
-        if self.debug_mode:
-            print("******: auto completeing page")
-        time.sleep(5) #box takes a second or 2 to appear
-
-        cookie_agree_xpath = '//*[@id="cookie_notice"]/div/table/tbody/tr/td[2]/div'
-
-        I_agree = wait.until(EC.presence_of_element_located((By.XPATH, cookie_agree_xpath)))
-        I_agree.click()
+        # self.driver.get("https://www.fanfiction.net")
+        #
+        # wait = WebDriverWait(self.driver, 10)
+        # if self.debug_mode:
+        #     print("******: auto completeing page")
+        # time.sleep(5) #box takes a second or 2 to appear
+        #
+        # cookie_agree_xpath = '//*[@id="cookie_notice"]/div/table/tbody/tr/td[2]/div'
+        #
+        # I_agree = wait.until(EC.presence_of_element_located((By.XPATH, cookie_agree_xpath)))
+        # I_agree.click()
 
         return True
 
@@ -153,6 +153,7 @@ class FanfictionNetScraper(BaseScraperClass):
             print("Ingesting story {} of {} in current batch".format(index, len(stories)))
 
             if self.add_singles and self.data_base:
+                print("Adding story to the data base in {} collection.".format(self.target_col))
                 self.data_base.add_to_database(itemToAdd=story_object,
                                                targetCollection=self.target_col,
                                                print_IDs=True)
