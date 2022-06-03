@@ -9,14 +9,12 @@ import time
 EXAMPLE_URL = "https://archiveofourown.org//tags//-------//works?page={}"
 
 def set_env():
-    current_location = os.getcwd()
-    package_folder = os.path.dirname(current_location)
-    common_folder = os.path.join(package_folder, "Benzaiten_Common")
-    sys.path.append("E:\\Python\\Benzaiten_mrk4\\venv\\Lib\\site-packages")
-    sys.path.append(package_folder)
-    sys.path.append(common_folder)
-
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
 set_env()
+import Site_custom
+env_object = Site_custom.env()
 
 from collect_data import Ui_MainWindow as data_ui
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -29,6 +27,14 @@ from PyQt5.QtCore import *
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 
+from webscraper_modules.archive_of_our_own import ArchiveOOO
+from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
+
+# this needs to match whats at the top of Scraper.py
+# really should be in a Json they both share
+
+config = {"FanFicNet": FanfictionNetScraper,
+          "ArchiveOfOurOwn": ArchiveOOO}
 
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
@@ -39,9 +45,11 @@ class configured_collect_data(data_ui):
 
         self.temp_file = temp_log_write_location = os.path.join(os.getcwd(), 'temp.json')
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
+        self.console_output.installEventFilter(self)
 
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
+        self.clear_output.clicked.connect(lambda: self.console_output.clear())
 
     def initui(self):
         # if you get an error here make sure data_ui inherits from QtWidgets.QMainWindow
@@ -51,6 +59,9 @@ class configured_collect_data(data_ui):
         self.process.started.connect(lambda: self.start_collection.setEnabled(False))
         self.process.finished.connect(lambda: self.start_collection.setEnabled(True))
 
+        for website in config.keys():
+            self.Ingest_mode.addItem(website)
+
     def write_to_console(self):
         self.console_output.insertPlainText(self.process.readAll().data().decode("cp850"))
         try:
@@ -58,7 +69,7 @@ class configured_collect_data(data_ui):
             current_postion = self.console_output_scroll_bar.value()
             self.console_output_scroll_bar.setValue(current_postion + 100000)
         except:
-            # encase we have got a scroll bar yet
+            # encase we have'nt got a scroll bar yet
             pass
 
     def start_collection_function(self):
@@ -82,12 +93,14 @@ class configured_collect_data(data_ui):
         add_to_db = self.add_to_data_base.checkState()
         page_to_start_at = self.spinBox.value()
         debug_mode = self.chkbx_debug_mode.checkState()
+        website_mode = self.Ingest_mode.currentText()
 
         state_dict ={"target_url": target_url,
                      "page_limt": page_limt,
                      "add_to_db": add_to_db,
                      "page_to_start": page_to_start_at,
-                     "debug": debug_mode}
+                     "debug": debug_mode,
+                     "website_mode": website_mode}
 
         print("Thhis is state_dict: ", state_dict)
         return state_dict
@@ -102,14 +115,28 @@ class configured_collect_data(data_ui):
 
     def query_search_page(self):
         current_text = self.target_url.text()
-        start_constant = 'https://archiveofourown.org/tags/'
-        end_constant = '/works'
+        if self.ignore_name_check:
+            # For if we have a custom group of tags that we want to collect
+            # ideally make sure this ends in &page= so we can add the .fomrat
+            # make sure &page= is ideally not anywhere else in the url
 
-        print("Start is good: ", current_text.startswith(start_constant),
-              "end is good: ",current_text.endswith(end_constant))
-        if current_text.startswith(start_constant) and current_text.endswith(end_constant):
-            print("Url passed check")
-            return current_text + "?page={}"
+            if "&page=" not in current_text:
+                print("Not page url found, I hope you know what your doing!")
+            return current_text + "{}"
+
+        else:
+            start_constant = 'https://archiveofourown.org/tags/'
+            end_constant = '/works'
+
+            print("Start is good: ", current_text.startswith(start_constant),
+                  "end is good: ",current_text.endswith(end_constant))
+            if current_text.startswith(start_constant) and current_text.endswith(end_constant):
+                print("Url passed check")
+                return current_text + "?page={}"
+
+
+
+
 
 
 def launch_ui():

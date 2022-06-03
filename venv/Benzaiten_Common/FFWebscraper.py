@@ -1,5 +1,22 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
+
+#buildt in
+import os
+import sys
+import json
+import time
+
+
+# env settings
+def set_env():
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
+set_env()
+import Site_custom
+env_object = Site_custom.env()
+
 #site packages
 import zlib
 import requests
@@ -13,12 +30,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from bs4 import BeautifulSoup
 
-#buildt in
-import os
-import sys
-import json
-import time
-
 #Harry%20Potter%20-%20J*d*%20K*d*%20Rowling
 #Shingeki no Kyojin | Attack on Titan
 
@@ -31,8 +42,8 @@ VIEW_ALL_CONSTANT ="https://archiveofourown.org{url}?view_adult=true&view_full_w
 
 COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 'view_adult', 'path': '/', 'secure': False, 'value': 'true'}
 
-DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
-INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
+DRIVER_PATH = env_object.chrome_driver_path
+INGESTED_LOG = env_object.ingested_log_path
 
 
 #TODO Index the stories as we add them to like a local Json or .txt IDk just so we dont add the same thing twice, use Author and Stor_Summary in the metadata so we dont have to requst the page -DONE
@@ -41,14 +52,17 @@ INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\ingested_logs\\Ingested_Log.json'
 #TODO move the constants to a seprate file and make them moduluar
 #TODO should maybe only write to the log after it acutally adds to the db, encase that fails, Maybe it should query the DB so its always 1:1
 
-#TODO God I want a UI for this with a buildt in console readout ideally -Working on it
+#TODO God I want a UI for this with a buildt in console readout ideally -DONE
 #TODO maybe take another look at that all page thing be nice to just requst one page per story -DONE
 
 #.encode('utf-8')
 
 class root_page(object):
 
-    def __init__(self, url, goto=None, delay=9, search_page_constant=SEARCHPAGE_CONSTANT, debug_mode=False):
+    def __init__(self, url, goto=None, delay=9,
+                 search_page_constant=SEARCHPAGE_CONSTANT,
+                 debug_mode=False, data_base_class=None,
+                 add_single_to_db=False):
         """
         will be given root starting page of a archive our our own index page, will go to the next page from there
         :param url: str: the root index page
@@ -56,7 +70,8 @@ class root_page(object):
         print("Starting Ingest Class..")
         self.debug_mode = debug_mode
         self.ingested_log = self.open_ingested_log()
-
+        self.data_base = data_base_class
+        self.add_singles = add_single_to_db
 
         self.search_page_constant = search_page_constant
         self.delay = delay
@@ -210,13 +225,19 @@ class root_page(object):
 
             Time_to_complete = estimate(story_metadata['Chapters'])
             print(Time_to_complete)
-            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'],ch=story_metadata['Chapters'],))
+            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'].encode('utf-8'),
+                                                                            ch=story_metadata['Chapters'],))
             print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
             story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'])
             print("----------Finished Ingest----------------")
             story_object['Content'] = story_content
 
-            story_Batch.append(story_object)
+            if self.add_singles and self.data_base:
+                self.data_base.add_to_database(itemToAdd=story_object,
+                                               targetCollection='Hololive_data',
+                                               print_IDs=True)
+            else:
+                story_Batch.append(story_object)
 
         for story in story_Batch:
             print("\n--------------\n")
@@ -270,7 +291,13 @@ class root_page(object):
                 pagenum = int(urls_split[-1])
                 page_nums.append(pagenum)
             except:
-                print("could not get page num from {}".format(url))
+                print("could not get page num from {} URL, trying text instead".format(url))
+                button_text = str(button.get_text())
+                if button_text.isnumeric():
+                    page_nums.append(int(button_text))
+                else:
+                    print("Could not get page num from button")
+
         return max(page_nums)
 
     def get_Story_meta_data(self, article_card):
@@ -466,7 +493,7 @@ class root_page(object):
                     print("******: printning a chapter sample from a full story")
                 print("sample")
                 text_sample = text.encode(encoding='utf-8')
-                print(text[0:120])
+                print(text_sample[0:120])
 
 
             print("Size of text uncompressed........: {}".format(sys.getsizeof(text)))
@@ -504,9 +531,9 @@ class root_page(object):
         #     count += 1
 
         print("----------------------------------------------")
-        print("Starting ingest of {} and its chapters".format(name))
+        print("Starting ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
         chapters = self.ingest_full_story(link)
-        print("Finished ingest of {} and its chapters".format(name))
+        print("Finished ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
 
         return chapters
 
