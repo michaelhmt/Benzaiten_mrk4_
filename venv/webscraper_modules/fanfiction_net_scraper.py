@@ -88,12 +88,16 @@ class FanfictionNetScraper(BaseScraperClass):
             page = self.driver.get(url)
         except selenium.common.exceptions.TimeoutException as timeout_error:
             print("Got time out error, Restarting browser.")
-            self.start_browser()
-            self.restarted_attempted = True
+            if not self.restarted_attempted:
+                self.start_browser()
+                self.restarted_attempted = True
+                return self.get_page(url)
 
 
         time.sleep(self.delay)
 
+        if self.restarted_attempted:
+            self.restarted_attempted = False
         return self.driver.page_source
 
     def time_out_holding_pattern(self, url):
