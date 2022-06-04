@@ -65,7 +65,7 @@ def iterate(page_to_start_with,
         print("No valid scraper set or it is misconfigured")
         return
 
-    database = Database_Class('ff_training_data')
+    database = Database_Class('FF_Data_Cluster')
     web_scraper_object = web_scraper_class(searchPage_constant.format(1),
                                            delay=25,
                                            search_page_constant=searchPage_constant,
