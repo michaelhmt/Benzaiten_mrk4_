@@ -1,7 +1,12 @@
 {
-	"web_scrapers" : {"FanFicNet": "FanfictionNetScraper",
-          			  "ArchiveOfOurOwn": "ArchiveOOO"},
-
-    "database_collections" : ["Hololive_data","FateGo_data","mlp_data"]
-
+    "web_scrapers": {
+        "FanFicNet": "FanfictionNetScraper",
+        "ArchiveOfOurOwn": "ArchiveOOO"
+    },
+    "database_collections": [
+        "Hololive_data",
+        "FateGo_data",
+        "mlp_data",
+        "Beyblade_data"
+    ]
 }

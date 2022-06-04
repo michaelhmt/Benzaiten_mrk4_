@@ -31,7 +31,8 @@ def launch_scraper_via_ui(log_path):
                             limt=int(launch_args['page_limt']),
                             add_to_db=int(launch_args['add_to_db']),
                             searchPage_constant=launch_args['target_url'],
-                            debug_mode=launch_args['debug'])
+                            debug_mode=launch_args['debug'],
+                            col=launch_args['target_col'])
         except Exception:
             print("Could not start Web scraper, got the following error: \n", traceback.format_exc())
 

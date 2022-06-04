@@ -32,9 +32,9 @@ from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
 
 # this needs to match whats at the top of Scraper.py
 # really should be in a Json they both share
-conf_path = env_object.config_path
+config_path = env_object.config_path
 
-with open(conf_path, "r") as config_file:
+with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 class configured_collect_data(data_ui):
@@ -48,6 +48,7 @@ class configured_collect_data(data_ui):
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
         self.console_output.installEventFilter(self)
         self.u_response = None
+        self.stop_launch = False
 
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
@@ -77,7 +78,7 @@ class configured_collect_data(data_ui):
     def start_collection_function(self):
         script_launch_args = str(self.get_ui_state())
 
-        if not self.get_ui_state():
+        if self.stop_launch:
             return
 
         log_path = str(self.temp_file)
@@ -90,11 +91,12 @@ class configured_collect_data(data_ui):
                                      "import Launch_helper; Launch_helper.launch_scraper_via_ui('{}');".format(log_path)])
 
     def get_ui_state(self):
+        self.stop_launch = False
         target_url = self.query_search_page()
         if not target_url:
             print("Given Url is Invalid, ending")
             self.console_output.insertPlainText("Given Url is Invalid, ending\n")
-            return
+            self.stop_launch = True
 
 
 
@@ -105,17 +107,23 @@ class configured_collect_data(data_ui):
         website_mode = self.Ingest_mode.currentText()
 
         if add_to_db:
-            if self.target_db_col.text() != "":
-                target_col_valid = self.check_collection(self.target_db_col.text())
+            user_col = self.target_db_col.text()
+            if user_col != "":
+                target_col_valid = self.check_collection(user_col)
                 if target_col_valid:
-                    target_collection = str(self.target_db_col.text())
+                    target_collection = str(user_col)
+                    self.add_to_col_list(user_col)
                 else:
                     print("stopping collection")
+                    self.stop_launch = True
                     return False
             else:
                 print("No collection given")
+                self.stop_launch = True
                 return False
 
+
+        print("This is target col: ", target_collection)
 
         state_dict ={"target_url": target_url,
                      "page_limt": page_limt,
@@ -127,6 +135,15 @@ class configured_collect_data(data_ui):
 
         print("Thhis is state_dict: ", state_dict)
         return state_dict
+
+    def add_to_col_list(self, col_name):
+        collections_lst = config['database_collections']
+        if col_name not in collections_lst:
+            collections_lst.append(col_name)
+            with open(config_path, "w") as coonfig_file:
+                config['database_collections'] = collections_lst
+                json.dump(config, coonfig_file, indent=4)
+
 
     def write_to_log(self, var_to_write):
         if not os.path.exists(self.temp_file):
@@ -178,7 +195,8 @@ class configured_collect_data(data_ui):
                 return True
             elif self.u_response == 'Cancel':
                 return False
-
+        elif col_to_check in collections_lst:
+            return True
 
     def response(self, i):
         self.u_response = i.text()

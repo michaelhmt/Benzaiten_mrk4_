@@ -92,7 +92,7 @@ class FanfictionNetScraper(BaseScraperClass):
         chrome_options = Options()
         #chrome_options.add_argument("--headless")
         #chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_argument("--window-size=10x10")
+        chrome_options.add_argument("--window-size=1024x1400")
         s=Service(DRIVER_PATH)
         if self.debug_mode:
             print("******: created browser options")
@@ -152,8 +152,12 @@ class FanfictionNetScraper(BaseScraperClass):
             story_object['Content'] = story_content
             print("Ingesting story {} of {} in current batch".format(index, len(stories)))
 
+
+            print("This is add_singles: ", self.add_singles)
+            print("This is database Class: ", self.data_base)
             if self.add_singles and self.data_base:
-                print("Adding story to the data base in {} collection.".format(self.target_col))
+                print("Adding {} to the data base in {} collection.".format(story_metadata['Title'].encode('utf-8'),
+                                                                            self.target_col))
                 self.data_base.add_to_database(itemToAdd=story_object,
                                                targetCollection=self.target_col,
                                                print_IDs=True)
