@@ -110,8 +110,7 @@ class FanfictionNetScraper(BaseScraperClass):
                     return self.driver.page_source
 
             except selenium.common.exceptions.TimeoutException as timeout_error:
-                if count > 50:
-                    print("Giving up moving onto next")
+                pass
 
     def start_browser(self):
         if self.debug_mode:
