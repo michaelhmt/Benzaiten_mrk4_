@@ -66,6 +66,7 @@ class FanfictionNetScraper(BaseScraperClass):
         self.data_base = data_base_class
         self.add_singles = add_single_to_db
         self.target_col = target_col
+        self.restarted_attempted = False
 
         self.ingested_log = self.open_ingested_log()
 
@@ -86,9 +87,10 @@ class FanfictionNetScraper(BaseScraperClass):
         try:
             page = self.driver.get(url)
         except selenium.common.exceptions.TimeoutException as timeout_error:
-            print("Got a time out getting will keep repeating.")
-            retry_attempt = self.time_out_holding_pattern(url)
-            return retry_attempt
+            print("Got time out error, Restarting browser.")
+            self.start_browser()
+            self.restarted_attempted = True
+
 
         time.sleep(self.delay)
 
@@ -114,7 +116,7 @@ class FanfictionNetScraper(BaseScraperClass):
 
     def start_browser(self):
         if self.debug_mode:
-            print("******: starting headles chrom browser")
+            print("******: starting headles chrome browser")
         chrome_options = Options()
         #chrome_options.add_argument("--headless")
         #chrome_options.add_experimental_option("detach", True)
