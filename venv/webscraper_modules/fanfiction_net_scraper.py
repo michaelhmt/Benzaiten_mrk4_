@@ -9,6 +9,9 @@ import datetime
 from pprint import pprint
 
 # env settings
+import selenium.common.exceptions
+
+
 def set_env():
     env_dir = os.path.dirname(os.getcwd())
     sys.path.append(env_dir)
@@ -80,11 +83,35 @@ class FanfictionNetScraper(BaseScraperClass):
         if self.debug_mode:
             print("******: getting url: {}".format(url))
 
-        page = self.driver.get(url)
+        try:
+            page = self.driver.get(url)
+        except selenium.common.exceptions.TimeoutException as timeout_error:
+            print("Got a time out getting will keep repeating.")
+            retry_attempt = self.time_out_holding_pattern(url)
+            return retry_attempt
 
         time.sleep(self.delay)
 
         return self.driver.page_source
+
+    def time_out_holding_pattern(self, url):
+        time.sleep(self.delay)
+        count = 0
+
+        while True:
+            count += 1
+            time.sleep(self.delay)
+            print("attempting to get page, attempt number: {}".format(count))
+
+            try:
+                page = self.driver.get(url)
+
+                if self.driver.page_source:
+                    return self.driver.page_source
+
+            except selenium.common.exceptions.TimeoutException as timeout_error:
+                if count > 50:
+                    print("Giving up moving onto next")
 
     def start_browser(self):
         if self.debug_mode:
