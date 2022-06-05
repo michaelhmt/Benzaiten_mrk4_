@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+from pprint import pprint
 
 # env settings
 def set_env():
@@ -11,10 +12,13 @@ set_env()
 import Site_custom
 env_object = Site_custom.env()
 
-#Benzaiten imports
+# site packages
+import pandas as pd
+
+# Benzaiten imports
 from Benzaiten_Common.DataBase import Database_Class
 
-
+dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv"
 
 class Collection_data(object):
 
@@ -40,7 +44,60 @@ class Collection_data(object):
 
         self.collection_json = delivery_location_file
 
-    
+    def make_data_frame(self):
+        if not self.collection_json:
+            #try to see if we already have one for the collection
+
+            on_dsk_cols = env_object.get_delivered_collections()
+            target_col = on_dsk_cols.get(self.collection_name)
+            if target_col:
+                self.collection_json = target_col
+            else:
+                print("no delivered file found please run, deliver_to_folder first")
+                return
+
+        with open(self.collection_json) as data_file:
+            data = json.load(data_file)
+
+        data_columns = ["Title", "Author", "Story Summary", "chapter Amount"]
+
+        rows = []
+
+        for collection in data:
+
+            summary = collection['MetaData']['Story Summary']
+            if not summary:
+                summary_clean_up = " "
+            else:
+                summary_clean_up = summary[0].replace("\n", " ")
+
+            rowdata = [collection['MetaData']['Title'],
+                       collection['MetaData']['Author'],
+                       summary_clean_up,
+                       collection['MetaData']['Chapters']
+                       ]
+            rows.append(rowdata)
+
+        data_frame = pd.DataFrame(rows, columns=data_columns)
+        data_frame.to_csv(dump_csv, encoding='utf-8')
+        pprint(self.get_tag_data(data))
+
+
+    def get_tag_data(self, collections):
+        tag_data = {}
+
+        for collection in collections:
+            tags = collection['MetaData']['Tags']
+            for tag in tags:
+                if not tag_data.get(tag):
+                    # we have not seen this tag before add it to the dict
+                    tag_data[tag] = 1
+                else:
+                    tag_data[tag] = tag_data[tag] + 1
+
+        return tag_data
+
 
 collection_obj = Collection_data('Hololive_data')
-collection_obj.deliver_to_folder()
+#collection_obj.deliver_to_folder()
+collection_obj.make_data_frame()

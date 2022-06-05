@@ -32,12 +32,19 @@ class env(object):
 
     def get_delivered_collections(self):
 
-        list_of_files = os.listdir(self.data_delivery_folder)
-
         collections_data = {}
-        for file in list_of_files:
-            if file.endswith(".json"):
-                file_name = os.path.split(os.path.basename(file))[0]
-                collections_data[file_name] = file
+
+        for root, _, files in os.walk(self.data_delivery_folder):
+            for name in files:
+                if name.endswith(".json"):
+                    print("This is name: ", name)
+                    file_name = name.split(".")[0]
+                    collections_data[file_name] = os.path.join(root, name)
+
+        print("This is collections_data: ", collections_data)
+        # for file in list_of_files:
+        #     if file.endswith(".json"):
+        #         file_name = os.path.split(os.path.basename(file))[0]
+        #         collections_data[file_name] = file
 
         return collections_data
