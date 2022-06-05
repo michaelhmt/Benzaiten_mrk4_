@@ -3,6 +3,7 @@ import os
 import sys
 import json
 from pprint import pprint
+import matplotlib.pyplot as plt
 
 # env settings
 def set_env():
@@ -80,7 +81,7 @@ class Collection_data(object):
 
         data_frame = pd.DataFrame(rows, columns=data_columns)
         data_frame.to_csv(dump_csv, encoding='utf-8')
-        pprint(self.get_tag_data(data))
+        #pprint(self.get_tag_data(data))
 
 
     def get_tag_data(self, collections):
@@ -95,7 +96,25 @@ class Collection_data(object):
                 else:
                     tag_data[tag] = tag_data[tag] + 1
 
+        self.make_pie_chart_of_tags(tag_data)
         return tag_data
+
+    def make_pie_chart_of_tags(self, tag_data, top_number = 40):
+        top_tags = {}
+
+        for number in range(top_number):
+            highest_index = [index for index, item in enumerate(tag_data.values()) if item == max(tag_data.values())][0]
+            all_tags =  [tag for tag in tag_data.keys()]
+            highest_tag = all_tags[highest_index]
+
+            top_tags[highest_tag] = tag_data[highest_tag]
+            del tag_data[highest_tag]
+
+        labels = [tag + " [{}]".format(top_tags[tag]) for tag in top_tags.keys()]
+
+        print("This is top tags: ", top_tags)
+        plt.pie(top_tags.values(), labels=labels, shadow=True)
+        plt.show()
 
 
 collection_obj = Collection_data('Hololive_data')
