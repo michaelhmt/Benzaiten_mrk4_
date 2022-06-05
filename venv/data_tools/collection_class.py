@@ -27,6 +27,7 @@ dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv
 save_tag_chart = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_breakdown.png"
 save_tag_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_wordcloud.png"
 save_summary_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\summary_wordcloud.png"
+contenst_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\contents_wordcloud.png"
 
 TAG_TO_REMOVE = ["No Archive Warnings Apply", "Virtual Streamer Animated Characters", "Creator Chose Not To Use Archive Warnings"]
 
@@ -154,6 +155,7 @@ class Collection_data(object):
         self.make_pie_chart_of_tags(tag_data)
         self.make_word_cloud_of_tags(tag_data)
         self.make_wordcloud_of_summary()
+        self.make_wordcloud_of_story_contents()
 
         return tag_data
 
@@ -259,6 +261,25 @@ class Collection_data(object):
         :return:
         """
         data = self.get_collection_data()
+        all_chapters = []
+        for collection in data:
+            chapter_dict = collection['Content']
+            [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+
+        all_contents_text = " ".join(all_chapters)
+
+        stop_words = set(STOPWORDS)
+        contents_wordcloud = WordCloud(stopwords=stop_words,
+                                      background_color='white',
+                                      width=1200,
+                                      height=700,
+                                      max_words=450).generate(all_contents_text)
+        plt.figure(figsize=(60, 35))
+        plt.imshow(contents_wordcloud, interpolation='bilinear')
+        plt.axis('off')
+        plt.savefig(contenst_wordcloud, bbox_inches='tight')
+
+
 
     def make_author_leaderboard(self):
         data = self.get_collection_data()
