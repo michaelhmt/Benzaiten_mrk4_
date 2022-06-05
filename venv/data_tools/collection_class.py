@@ -23,6 +23,7 @@ from wordcloud import STOPWORDS
 
 # Benzaiten imports
 from Benzaiten_Common.DataBase import Database_Class
+import Benzaiten_Common.utils as utils
 
 dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv"
 save_tag_chart = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_breakdown.png"
@@ -43,6 +44,9 @@ class Collection_data(object):
         """
         self.database_class = Database_Class('FF_Data_Cluster')
         self.collection_name = name_of_collection
+        self.delivery_dir = os.path.join(env_object.data_delivery_folder, (name_of_collection + "_data_delivery"))
+        utils.ensure_dir(self.delivery_dir)
+
         self.collection_json = None
 
     def deliver_to_folder(self):
@@ -104,7 +108,7 @@ class Collection_data(object):
             summary_clean_up = summary[0].replace("\n", " ")
         return summary_clean_up
 
-    def make_data_frame(self):
+    def make_data_frame(self, csv_location):
         """
         Makes a Pandas dataframe based on the data that exists in the metadata
         writes that data to a csv
@@ -126,10 +130,8 @@ class Collection_data(object):
                        ]
             rows.append(rowdata)
 
-        self.get_tag_data(data)
-
         data_frame = pd.DataFrame(rows, columns=data_columns)
-        data_frame.to_csv(dump_csv, encoding='utf-8')
+        data_frame.to_csv(csv_location, encoding='utf-8')
 
 
     def get_tag_data(self, collections):
@@ -153,11 +155,14 @@ class Collection_data(object):
                 else:
                     tag_data[tag] = tag_data[tag] + 1
 
-        self.make_pie_chart_of_tags(tag_data)
-        self.make_word_cloud_of_tags(tag_data)
-        self.make_wordcloud_of_summary()
-        self.make_wordcloud_of_story_contents()
-        self.get_top_authors()
+        print("----This is Tag Data________")
+        print(tag_data)
+
+        # self.make_pie_chart_of_tags(tag_data)
+        # self.make_word_cloud_of_tags(tag_data)
+        # self.make_wordcloud_of_summary()
+        # self.make_wordcloud_of_story_contents()
+        # self.get_top_authors()
 
         return tag_data
 
@@ -326,9 +331,9 @@ class Collection_data(object):
                 # add to an existing data here
 
                 this_author_data['story_number'] = this_author_data['story_number'] + 1
-                current_tags = this_author_data['tags']
+                current_tags = this_author_data['Tags']
                 current_tags.extend(self.clean_tags(collection['MetaData']['Tags']))
-                this_author_data['tags'] = current_tags
+                this_author_data['Tags'] = current_tags
 
                 current_summary =  this_author_data['summary']
                 current_summary.extend([self.get_clean_summary(collection)])
@@ -354,9 +359,9 @@ class Collection_data(object):
                 a_data = {}
                 a_data['story_number'] = 1
                 if  collection['MetaData']['Tags']:
-                    a_data['tags'] = self.clean_tags(collection['MetaData']['Tags'])
+                    a_data['Tags'] = self.clean_tags(collection['MetaData']['Tags'])
                 else:
-                    a_data['tags'] = []
+                    a_data['Tags'] = []
 
                 a_data['summary'] = [self.get_clean_summary(collection)]
                 a_data['chapters'] = [int(collection['MetaData']['Chapters'])]
@@ -391,6 +396,47 @@ class Collection_data(object):
 
     def deliver_data(self):
 
+        csv_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_data_view.csv"))
+        pie_chart_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_tag_p_chart.png"))
+        tag_cloud_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_tag_wordcloud.png"))
+        summary_cloud_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_summary_wordcloud.png"))
+        chapters_cloud_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_chapters_wordcloud.png"))
+
+        tag_data = self.get_tag_data(self.get_collection_data())
+
+        self.make_data_frame(csv_delivery_location)
+        self.make_pie_chart_of_tags(tag_data, save_file_location=pie_chart_delivery_location)
+        self.make_word_cloud_of_tags(tag_data, save_file_location=tag_cloud_delivery_location)
+        self.make_wordcloud_of_summary(save_file_location=summary_cloud_delivery_location)
+        self.make_wordcloud_of_story_contents(save_file_location=chapters_cloud_delivery_location)
+
+    def deliver_top_author_anyalsis(self):
+
+        top_authors = self.get_top_authors()
+
+        for index, author in enumerate(top_authors.keys()):
+            self.generate_data_for_author(author, top_authors[author], index+1, top_authors[author]['story_number'])
+
+
+    def generate_data_for_author(self, authors_name, authors_data, pos, amount):
+
+        author_delivery_folder = os.path.join(self.delivery_dir, "{} - {} - amount {}".format(pos,
+                                                                                              authors_name,
+                                                                                              amount))
+        utils.ensure_dir(author_delivery_folder)
+
+        tag_p_chart_delivery_location = os.path.join(author_delivery_folder, "{}_tag_p_chart.png".format(authors_name))
+        tag_cloud_delivery_location = os.path.join(author_delivery_folder, "{}_tag_cloud.png".format(authors_name))
+        summary_cloud_delivery_location = os.path.join(author_delivery_folder, "{}_summary_cloud.png".format(authors_name))
+        contents_cloud_delivery_location = os.path.join(author_delivery_folder,"{}_contents_cloud.png".format(authors_name))
+
+        tag_data = self.get_tag_data([{'MetaData': authors_data}])
+        tag_amount = len(tag_data.keys())
+
+        self.make_pie_chart_of_tags(tag_data, save_file_location=tag_p_chart_delivery_location,top_number=tag_amount)
+        self.make_word_cloud_of_tags(tag_data, save_file_location=tag_cloud_delivery_location, top_range=tag_amount)
+        self.make_wordcloud_of_summary(authors_data['summary'], save_file_location=summary_cloud_delivery_location)
+        self.make_wordcloud_of_story_contents(authors_data['Content'], save_file_location=contents_cloud_delivery_location)
 
 
 
@@ -401,4 +447,5 @@ class Collection_data(object):
 
 collection_obj = Collection_data('Hololive_data')
 #collection_obj.deliver_to_folder()
-collection_obj.make_data_frame()
+collection_obj.deliver_data()
+collection_obj.deliver_top_author_anyalsis()
