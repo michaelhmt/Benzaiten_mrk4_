@@ -4,6 +4,7 @@ import sys
 import json
 from pprint import pprint
 import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 # env settings
 def set_env():
@@ -108,7 +109,11 @@ class Collection_data(object):
                     tag_data[tag] = tag_data[tag] + 1
 
         self.make_pie_chart_of_tags(tag_data)
+
         return tag_data
+
+    def make_word_cloud_of_tags(self, tag_data):
+        pass
 
     def make_pie_chart_of_tags(self, tag_data, top_number = 50):
         top_tags = {}
