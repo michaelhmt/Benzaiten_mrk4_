@@ -324,5 +324,5 @@ venv/Benzaiten_UI/temp.json
 venv/Benzaiten_UI/__pycache__/collect_data.cpython-39.pyc
 venv/config.json
 venv/config.json
-venv/delivered_collections
+venv/delivered_collections/*
 venv/delivered_collections/tag_breakdown.png
