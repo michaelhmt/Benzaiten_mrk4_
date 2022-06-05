@@ -222,6 +222,8 @@ class FanfictionNetScraper(BaseScraperClass):
     def get_story_metadata(self, story):
         story_metadata_object = {}
 
+        story_metadata_object["SOURCE"] = "FanFictNet"
+
         title = story.find_all('a', class_='stitle')[0]
         story_metadata_object['Title'] = title.get_text()
         story_metadata_object["Link"] = title['href']

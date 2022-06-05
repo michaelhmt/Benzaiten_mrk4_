@@ -5,6 +5,7 @@ import json
 from pprint import pprint
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import copy
 
 # env settings
 def set_env():
@@ -22,6 +23,7 @@ from Benzaiten_Common.DataBase import Database_Class
 
 dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv"
 save_tag_chart = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_breakdown.png"
+save_tag_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_wordcloud.png"
 
 TAG_TO_REMOVE = ["No Archive Warnings Apply", "Virtual Streamer Animated Characters", "Creator Chose Not To Use Archive Warnings"]
 
@@ -109,25 +111,48 @@ class Collection_data(object):
                     tag_data[tag] = tag_data[tag] + 1
 
         self.make_pie_chart_of_tags(tag_data)
+        self.make_word_cloud_of_tags(tag_data)
 
         return tag_data
 
     def make_word_cloud_of_tags(self, tag_data):
-        pass
+        tag_by_size = self.get_top_tags(tag_data, top_range=250)
+        print("This is tag data for the word cloud: ", tag_by_size)
+        tag_wc = WordCloud(background_color='white',
+                           width=1200,
+                           height=700,
+                           max_words=250).generate_from_frequencies(tag_by_size)
 
-    def make_pie_chart_of_tags(self, tag_data, top_number = 50):
+        plt.figure(figsize=(60, 35))
+        plt.imshow(tag_wc, interpolation='bilinear')
+        plt.axis('off')
+        plt.savefig(save_tag_wordcloud, bbox_inches='tight')
+
+
+    def get_top_tags(self, tag_data, top_range=50, with_labels=False):
         top_tags = {}
 
-        for number in range(top_number):
-            highest_index = [index for index, item in enumerate(tag_data.values()) if item == max(tag_data.values())][0]
-            all_tags =  [tag for tag in tag_data.keys()]
+        tag_data_local = copy.deepcopy(tag_data)
+
+        for number in range(top_range):
+            highest_index = [index for index, item in enumerate(tag_data_local.values()) if item == max(tag_data_local.values())][0]
+            all_tags =  [tag for tag in tag_data_local.keys()]
             highest_tag = all_tags[highest_index]
 
-            top_tags[highest_tag + " [{}]".format(tag_data[highest_tag]) ]  = tag_data[highest_tag]
-            del tag_data[highest_tag]
+            if with_labels:
+                top_tags[highest_tag + " [{}]".format(tag_data_local[highest_tag]) ]  = tag_data_local[highest_tag]
+            else:
+                top_tags[highest_tag] = tag_data_local[highest_tag]
+
+            del tag_data_local[highest_tag]
+
+        return top_tags
+
+    def make_pie_chart_of_tags(self, tag_data, top_number = 50):
+
+        top_tags = self.get_top_tags(tag_data, with_labels=True)
 
         #labels = [tag + " [{}]".format(top_tags[tag]) for tag in top_tags.keys()]
-
 
         cols = ["total occurrences"]
         print("This is top tags: ", top_tags)
@@ -143,5 +168,5 @@ class Collection_data(object):
 
 
 collection_obj = Collection_data('Hololive_data')
-collection_obj.deliver_to_folder()
+#collection_obj.deliver_to_folder()
 collection_obj.make_data_frame()

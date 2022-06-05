@@ -282,6 +282,7 @@ class ArchiveOOO(BaseScraperClass):
             print("******: finding the story metadata")
 
         story_metaData_Object = {}
+        story_metaData_Object["SOURCE"] = "ArchiveOfOurOwn"
 
         title = article_card.find_all(class_='heading')
         for entry in title:
