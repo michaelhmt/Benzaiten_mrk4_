@@ -20,6 +20,11 @@ import pandas as pd
 from Benzaiten_Common.DataBase import Database_Class
 
 dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv"
+save_tag_chart = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_breakdown.png"
+
+TAG_TO_REMOVE = ["No Archive Warnings Apply", "Virtual Streamer Animated Characters", "Creator Chose Not To Use Archive Warnings"]
+
+
 
 class Collection_data(object):
 
@@ -79,6 +84,8 @@ class Collection_data(object):
                        ]
             rows.append(rowdata)
 
+        self.get_tag_data(data)
+
         data_frame = pd.DataFrame(rows, columns=data_columns)
         data_frame.to_csv(dump_csv, encoding='utf-8')
         #pprint(self.get_tag_data(data))
@@ -90,6 +97,10 @@ class Collection_data(object):
         for collection in collections:
             tags = collection['MetaData']['Tags']
             for tag in tags:
+                if tag in TAG_TO_REMOVE:
+                    continue
+                if tag == 'Hololive':
+                    continue
                 if not tag_data.get(tag):
                     # we have not seen this tag before add it to the dict
                     tag_data[tag] = 1
@@ -99,7 +110,7 @@ class Collection_data(object):
         self.make_pie_chart_of_tags(tag_data)
         return tag_data
 
-    def make_pie_chart_of_tags(self, tag_data, top_number = 40):
+    def make_pie_chart_of_tags(self, tag_data, top_number = 50):
         top_tags = {}
 
         for number in range(top_number):
@@ -107,16 +118,25 @@ class Collection_data(object):
             all_tags =  [tag for tag in tag_data.keys()]
             highest_tag = all_tags[highest_index]
 
-            top_tags[highest_tag] = tag_data[highest_tag]
+            top_tags[highest_tag + " [{}]".format(tag_data[highest_tag]) ]  = tag_data[highest_tag]
             del tag_data[highest_tag]
 
-        labels = [tag + " [{}]".format(top_tags[tag]) for tag in top_tags.keys()]
+        #labels = [tag + " [{}]".format(top_tags[tag]) for tag in top_tags.keys()]
 
+
+        cols = ["total occurrences"]
         print("This is top tags: ", top_tags)
-        plt.pie(top_tags.values(), labels=labels, shadow=True)
-        plt.show()
+        tags_data_frame = pd.DataFrame(top_tags.values(), columns=cols, index=top_tags.keys())
+        chart = tags_data_frame.plot(kind='pie',
+                                     autopct='%1.0f%%',
+                                     title="Most popular tags",
+                                     subplots=True,
+                                     figsize=(40,35),
+                                     fontsize=35,
+                                     labeldistance=None)[0].get_figure()
+        chart.savefig(save_tag_chart)
 
 
 collection_obj = Collection_data('Hololive_data')
-#collection_obj.deliver_to_folder()
+collection_obj.deliver_to_folder()
 collection_obj.make_data_frame()
