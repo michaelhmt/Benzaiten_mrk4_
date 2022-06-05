@@ -4,6 +4,7 @@ import sys
 import json
 from pprint import pprint
 import copy
+import time
 
 # env settings
 def set_env():
@@ -156,16 +157,17 @@ class Collection_data(object):
         self.make_word_cloud_of_tags(tag_data)
         self.make_wordcloud_of_summary()
         self.make_wordcloud_of_story_contents()
+        self.get_top_authors()
 
         return tag_data
 
-    def make_word_cloud_of_tags(self, tag_data):
+    def make_word_cloud_of_tags(self, tag_data, top_range=250, save_file_location=None):
         """
         Make a word cloud of the 250 most popular tags will save this to the datadelivery location when complete
         :param tag_data:
         :return:
         """
-        tag_by_size = self.get_top_tags(tag_data, top_range=250)
+        tag_by_size = self.get_top_tags(tag_data, top_range=top_range)
         tag_wc = WordCloud(background_color='white',
                            width=1200,
                            height=700,
@@ -175,7 +177,11 @@ class Collection_data(object):
         plt.figure(figsize=(60, 35))
         plt.imshow(tag_wc, interpolation='bilinear')
         plt.axis('off')
-        plt.savefig(save_tag_wordcloud, bbox_inches='tight')
+
+        if save_file_location:
+            plt.savefig(save_file_location, bbox_inches='tight')
+        else:
+            plt.savefig(save_tag_wordcloud, bbox_inches='tight')
 
 
     def get_top_tags(self, tag_data, top_range=50, with_labels=False):
@@ -207,7 +213,7 @@ class Collection_data(object):
 
         return top_tags
 
-    def make_pie_chart_of_tags(self, tag_data, top_number = 50):
+    def make_pie_chart_of_tags(self, tag_data, top_number=50, save_file_location=None):
         """
         will make a pie chart of the tag data and save it to disk
         :param tag_data: the full tag data that you want to breakdown
@@ -231,19 +237,28 @@ class Collection_data(object):
                                      figsize=(40,35),
                                      fontsize=35,
                                      labeldistance=None)[0].get_figure()
-        chart.savefig(save_tag_chart)
 
-    def make_wordcloud_of_summary(self):
+        if save_file_location:
+            chart.savefig(save_file_location)
+        else:
+            chart.savefig(save_tag_chart)
+
+    def make_wordcloud_of_summary(self, given_summary=None, save_file_location=None):
         """
         Make a word cloud of the summary of all the stories in the collection and save it to disk
         :return:
         """
-        data = self.get_collection_data()
 
-        summaries = [self.get_clean_summary(col) for col in data]
+        if given_summary:
+            all_summary_text = " ".join(given_summary)
+        else:
+            data = self.get_collection_data()
+            summaries = [self.get_clean_summary(col) for col in data]
 
-        # has to be a better way to do this
-        all_summary_text = " ".join(summaries)
+            # has to be a better way to do this
+            all_summary_text = " ".join(summaries)
+
+
         stop_words = set(STOPWORDS)
         summary_wordcloud = WordCloud(stopwords=stop_words,
                                       background_color='white',
@@ -253,20 +268,27 @@ class Collection_data(object):
         plt.figure(figsize=(60, 35))
         plt.imshow(summary_wordcloud, interpolation='bilinear')
         plt.axis('off')
-        plt.savefig(save_summary_wordcloud, bbox_inches='tight')
 
-    def make_wordcloud_of_story_contents(self):
+        if save_file_location:
+            plt.savefig(save_file_location, bbox_inches='tight')
+        else:
+            plt.savefig(save_summary_wordcloud, bbox_inches='tight')
+
+    def make_wordcloud_of_story_contents(self, given_contents=None, save_file_location=None):
         """
         Make a wordcloud of all of the story contents and save it to disk
         :return:
         """
-        data = self.get_collection_data()
-        all_chapters = []
-        for collection in data:
-            chapter_dict = collection['Content']
-            [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+        if given_contents:
+            all_contents_text = " ".join(given_contents)
+        else:
+            data = self.get_collection_data()
+            all_chapters = []
+            for collection in data:
+                chapter_dict = collection['Content']
+                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
 
-        all_contents_text = " ".join(all_chapters)
+            all_contents_text = " ".join(all_chapters)
 
         stop_words = set(STOPWORDS)
         contents_wordcloud = WordCloud(stopwords=stop_words,
@@ -277,12 +299,102 @@ class Collection_data(object):
         plt.figure(figsize=(60, 35))
         plt.imshow(contents_wordcloud, interpolation='bilinear')
         plt.axis('off')
-        plt.savefig(contenst_wordcloud, bbox_inches='tight')
+
+        if save_file_location:
+            plt.savefig(save_file_location, bbox_inches='tight')
+        else:
+            plt.savefig(contenst_wordcloud, bbox_inches='tight')
+
+    def clean_tags(self, tags_list):
+        return [tag for tag in tags_list if tag not in TAG_TO_REMOVE]
 
 
-
-    def make_author_leaderboard(self):
+    def make_author_data(self):
         data = self.get_collection_data()
+
+        author_data = {}
+
+        print("Creating author data")
+
+        for collection in data:
+            if not collection['Content']:
+                continue
+
+            author = collection['MetaData']['Author']
+            this_author_data = author_data.get(author)
+            if this_author_data:
+                # add to an existing data here
+
+                this_author_data['story_number'] = this_author_data['story_number'] + 1
+                current_tags = this_author_data['tags']
+                current_tags.extend(self.clean_tags(collection['MetaData']['Tags']))
+                this_author_data['tags'] = current_tags
+
+                current_summary =  this_author_data['summary']
+                current_summary.extend([self.get_clean_summary(collection)])
+                this_author_data['summary'] = current_summary
+
+                current_chapters =  this_author_data['chapters']
+                current_chapters.append(int(collection['MetaData']['Chapters']))
+                this_author_data['chapters'] = current_chapters
+
+                all_chapters = []
+                chapter_dict = collection['Content']
+                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                current_contents =  this_author_data['contents']
+                current_contents.extend(all_chapters)
+                this_author_data['contents'] = current_contents
+
+
+
+                author_data[author] = this_author_data
+
+            else:
+                # make the authors data here
+                a_data = {}
+                a_data['story_number'] = 1
+                if  collection['MetaData']['Tags']:
+                    a_data['tags'] = self.clean_tags(collection['MetaData']['Tags'])
+                else:
+                    a_data['tags'] = []
+
+                a_data['summary'] = [self.get_clean_summary(collection)]
+                a_data['chapters'] = [int(collection['MetaData']['Chapters'])]
+
+                all_chapters = []
+                chapter_dict = collection['Content']
+                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+
+                a_data['contents'] = [" ".join(all_chapters)]
+
+                author_data[author] = a_data
+
+        return author_data
+
+    def get_top_authors(self, top_range=5):
+        top_authors = {}
+        author_data = self.make_author_data()
+
+        author_data_local = copy.deepcopy(author_data)
+
+        print("Finding top authors")
+
+        for number in range(top_range):
+            higest_candiate = ["Empty", 0]
+            for author in author_data_local.keys():
+                if author_data[author]["story_number"] > higest_candiate[1]:
+                    higest_candiate = [author, author_data[author]["story_number"]]
+            top_authors[higest_candiate[0]] = author_data_local[higest_candiate[0]]
+            del author_data_local[higest_candiate[0]]
+
+        return top_authors
+
+    def deliver_data(self):
+
+
+
+
+
 
 
 
