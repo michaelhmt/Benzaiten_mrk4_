@@ -81,6 +81,3 @@ class Database_Class(object):
 #
 # testdb = Database_Class('FF_Data_Cluster')
 # testdb.add_to_database(testpackage, 'collectedData')
-
-testdb = Database_Class("FF_Data_Cluster")
-get_data = testdb.get_complete_collection("Hololive_data")

@@ -155,9 +155,6 @@ class Collection_data(object):
                 else:
                     tag_data[tag] = tag_data[tag] + 1
 
-        print("----This is Tag Data________")
-        print(tag_data)
-
         # self.make_pie_chart_of_tags(tag_data)
         # self.make_word_cloud_of_tags(tag_data)
         # self.make_wordcloud_of_summary()
@@ -188,6 +185,7 @@ class Collection_data(object):
         else:
             plt.savefig(save_tag_wordcloud, bbox_inches='tight')
 
+        plt.close(tag_wc)
 
     def get_top_tags(self, tag_data, top_range=50, with_labels=False):
         """
@@ -233,7 +231,6 @@ class Collection_data(object):
         #labels = [tag + " [{}]".format(top_tags[tag]) for tag in top_tags.keys()]
 
         cols = ["total occurrences"]
-        print("This is top tags: ", top_tags)
         tags_data_frame = pd.DataFrame(top_tags.values(), columns=cols, index=top_tags.keys())
         chart = tags_data_frame.plot(kind='pie',
                                      autopct='%1.0f%%',
@@ -247,6 +244,8 @@ class Collection_data(object):
             chart.savefig(save_file_location)
         else:
             chart.savefig(save_tag_chart)
+
+        plt.close(chart)
 
     def make_wordcloud_of_summary(self, given_summary=None, save_file_location=None):
         """
@@ -279,6 +278,8 @@ class Collection_data(object):
         else:
             plt.savefig(save_summary_wordcloud, bbox_inches='tight')
 
+        plt.close(summary_wordcloud)
+
     def make_wordcloud_of_story_contents(self, given_contents=None, save_file_location=None):
         """
         Make a wordcloud of all of the story contents and save it to disk
@@ -291,7 +292,11 @@ class Collection_data(object):
             all_chapters = []
             for collection in data:
                 chapter_dict = collection['Content']
-                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                try:
+                    [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                except AttributeError:
+                    # we have a broken structrue it most likley a list instead
+                    [all_chapters.append(chapter) for chapter in chapter_dict if chapter]
 
             all_contents_text = " ".join(all_chapters)
 
@@ -309,6 +314,8 @@ class Collection_data(object):
             plt.savefig(save_file_location, bbox_inches='tight')
         else:
             plt.savefig(contenst_wordcloud, bbox_inches='tight')
+
+        plt.close(contents_wordcloud)
 
     def clean_tags(self, tags_list):
         return [tag for tag in tags_list if tag not in TAG_TO_REMOVE]
@@ -345,7 +352,10 @@ class Collection_data(object):
 
                 all_chapters = []
                 chapter_dict = collection['Content']
-                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                try:
+                    [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                except AttributeError:
+                    [all_chapters.append(chapter) for chapter in chapter_dict if chapter]
                 current_contents =  this_author_data['contents']
                 current_contents.extend(all_chapters)
                 this_author_data['contents'] = current_contents
@@ -368,7 +378,10 @@ class Collection_data(object):
 
                 all_chapters = []
                 chapter_dict = collection['Content']
-                [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                try:
+                    [all_chapters.append(chapter) for chapter in chapter_dict.values()]
+                except AttributeError:
+                    [all_chapters.append(chapter) for chapter in chapter_dict if chapter]
 
                 a_data['contents'] = [" ".join(all_chapters)]
 
@@ -404,10 +417,15 @@ class Collection_data(object):
 
         tag_data = self.get_tag_data(self.get_collection_data())
 
+        print("making CSV")
         self.make_data_frame(csv_delivery_location)
+        print("Making Pie chart of tags")
         self.make_pie_chart_of_tags(tag_data, save_file_location=pie_chart_delivery_location)
+        print("making word cloud of tags")
         self.make_word_cloud_of_tags(tag_data, save_file_location=tag_cloud_delivery_location)
+        print("making wordcloud of summary")
         self.make_wordcloud_of_summary(save_file_location=summary_cloud_delivery_location)
+        print("Making word cloud of contents")
         self.make_wordcloud_of_story_contents(save_file_location=chapters_cloud_delivery_location)
 
     def deliver_top_author_anyalsis(self):
@@ -436,7 +454,7 @@ class Collection_data(object):
         self.make_pie_chart_of_tags(tag_data, save_file_location=tag_p_chart_delivery_location,top_number=tag_amount)
         self.make_word_cloud_of_tags(tag_data, save_file_location=tag_cloud_delivery_location, top_range=tag_amount)
         self.make_wordcloud_of_summary(authors_data['summary'], save_file_location=summary_cloud_delivery_location)
-        self.make_wordcloud_of_story_contents(authors_data['Content'], save_file_location=contents_cloud_delivery_location)
+        self.make_wordcloud_of_story_contents(authors_data['contents'], save_file_location=contents_cloud_delivery_location)
 
 
 
@@ -446,6 +464,6 @@ class Collection_data(object):
 
 
 collection_obj = Collection_data('Hololive_data')
-#collection_obj.deliver_to_folder()
+collection_obj.deliver_to_folder()
 collection_obj.deliver_data()
 collection_obj.deliver_top_author_anyalsis()

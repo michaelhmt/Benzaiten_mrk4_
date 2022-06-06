@@ -326,3 +326,4 @@ venv/config.json
 venv/config.json
 venv/delivered_collections/*
 venv/delivered_collections/tag_breakdown.png
+*.pyc
