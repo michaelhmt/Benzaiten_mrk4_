@@ -251,7 +251,7 @@ class ArchiveOOO(BaseScraperClass):
                 self.restarted_attempted = True
                 return self.get_dynamic_page(url)
 
-            
+
         if self.restarted_attempted:
             self.restarted_attempted = False
         #print(driver.page_source)
@@ -378,7 +378,7 @@ class ArchiveOOO(BaseScraperClass):
 
         chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
 
-        chapter_text = chapter_soup.find('div', class_='userstuff').next_element.get_text()
+        chapter_text = chapter_soup.find('div', class_='chapter').next_element.get_text()
 
         return {"1": chapter_text}
 
