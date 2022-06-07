@@ -373,14 +373,19 @@ class ArchiveOOO(BaseScraperClass):
         if self.debug_mode:
             print("******: ingesting a single chapter")
 
+        chapter_text = []
+
         chapterlink = STORY_PAGE_CONSTANT.format(url=link)
         chapter_page = self.get_dynamic_page(chapterlink)
 
         chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
 
-        chapter_text = chapter_soup.find('div', class_='chapter').next_element.get_text()
+        chapter_group = chapter_soup.find('div', class_='userstuff module')
 
-        return {"1": chapter_text}
+        for tag in chapter_group:
+            chapter_text.append(tag.get_text())
+
+        return {"1": ' '.join(chapter_text)}
 
     def ingest_full_story(self, link):
         if self.debug_mode:
@@ -447,12 +452,13 @@ class ArchiveOOO(BaseScraperClass):
 
         return chapters
 
-# from Benzaiten_Common.DataBase import Database_Class
-#
-# databaseclass = Database_Class("FF_Data_Cluster")
-# scarper_class = ArchiveOOO("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1",
-#                            search_page_constant="https://archiveofourown.org/tags/Fate*s*Grand Order/works?page={}",
-#                            goto=2,
-#                            data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
-#
+from Benzaiten_Common.DataBase import Database_Class
+
+databaseclass = Database_Class("FF_Data_Cluster")
+scarper_class = ArchiveOOO("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1",
+                           search_page_constant="https://archiveofourown.org/tags/Fate*s*Grand Order/works?page={}",
+                           goto=2,
+                           data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
+
 # scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")
+print(scarper_class.ingest_chapter("/works/36158623"))
