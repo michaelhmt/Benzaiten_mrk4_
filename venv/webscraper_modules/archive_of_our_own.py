@@ -64,6 +64,7 @@ class ArchiveOOO(BaseScraperClass):
         self.target_col = target_col
 
         self.search_page_constant = search_page_constant
+        self.restarted_attempted = False
         self.delay = delay
         self.root_url = url
         self.root = self.get_page(self.root_url)
@@ -201,7 +202,8 @@ class ArchiveOOO(BaseScraperClass):
             print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'].encode('utf-8'),
                                                                             ch=story_metadata['Chapters'],))
             print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
-            story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'])
+            is_single_chapter = int(story_metadata['Chapters']) == 1
+            story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'],ingest_single=is_single_chapter)
             print("----------Finished Ingest----------------")
             story_object['Content'] = story_content
 
@@ -240,7 +242,18 @@ class ArchiveOOO(BaseScraperClass):
         if self.debug_mode:
             print("******: getting a dynamic page")
         time.sleep(self.delay)
-        page = self.driver.get(url)
+        try:
+            page = self.driver.get(url)
+        except selenium.common.exceptions.TimeoutException as timeout_error:
+            print("Got time out error, Restarting browser.")
+            if not self.restarted_attempted:
+                self.start_browser()
+                self.restarted_attempted = True
+                return self.get_dynamic_page(url)
+
+            
+        if self.restarted_attempted:
+            self.restarted_attempted = False
         #print(driver.page_source)
         return self.driver.page_source
 
@@ -358,35 +371,16 @@ class ArchiveOOO(BaseScraperClass):
         :return:
         """
         if self.debug_mode:
-            print("******: ingesting a chapter")
-
-        chapter_contents = []
+            print("******: ingesting a single chapter")
 
         chapterlink = STORY_PAGE_CONSTANT.format(url=link)
         chapter_page = self.get_dynamic_page(chapterlink)
 
         chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
 
-        chpaters_group = chapter_soup.find_all('div', class_='chapter')[0]
-        chapters = chpaters_group.find_all(role='article')
+        chapter_text = chapter_soup.find('div', class_='userstuff').next_element.get_text()
 
-        for phargraph in chapters:
-            text = phargraph.get_text()
-            if len(text) > 35:
-                if self.debug_mode:
-                    print("******: printing a sample")
-                print("sample")
-                text_sample = text.encode('utf-8')
-                print(text_sample[0:180])
-
-
-            print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
-
-            # compressed = zlib.compress(text.encode()) #basic string compression
-            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
-
-            chapter_contents.append(text)
-        return chapter_contents
+        return {"1": chapter_text}
 
     def ingest_full_story(self, link):
         if self.debug_mode:
@@ -406,7 +400,7 @@ class ArchiveOOO(BaseScraperClass):
         print("Chapter lst len: ", len(chapters_lst))
         for chapter in chapters_lst:
             if self.debug_mode:
-                print("******: getting al the chapters")
+                print("******: getting all the chapters")
 
             chapter_contents = []
 
@@ -435,7 +429,7 @@ class ArchiveOOO(BaseScraperClass):
 
         return chapters
 
-    def ingest_story(self, link, name):
+    def ingest_story(self, link, name, ingest_single=False):
         """
         give a link from metadata object, will get a lst of chpater link and get the strings of the chapters
         returns a dict with int as keys for the chpater number. starting at 1
@@ -443,21 +437,22 @@ class ArchiveOOO(BaseScraperClass):
         :return:
         """
 
-        # OLD CODE for ingesting one chapter at a time might be useful to keep if we need it
-        # chapters = {}
-        # chapter_index = self.Story_index(link)
-        #
-        # count = 1
-        # for chapter in chapter_index:
-        #     print("----------------------------------------------")
-        #     print("Starting ingest of chapter {}".format(count))
-        #     chapters[str(count)] = self.ingest_chapter(chapter)
-        #     print("Finished ingest of chapter {}".format(count))
-        #     count += 1
-
         print("----------------------------------------------")
         print("Starting ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
-        chapters = self.ingest_full_story(link)
+        if ingest_single:
+            chapters =self.ingest_chapter(link)
+        else:
+            chapters = self.ingest_full_story(link)
         print("Finished ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
 
         return chapters
+
+# from Benzaiten_Common.DataBase import Database_Class
+#
+# databaseclass = Database_Class("FF_Data_Cluster")
+# scarper_class = ArchiveOOO("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1",
+#                            search_page_constant="https://archiveofourown.org/tags/Fate*s*Grand Order/works?page={}",
+#                            goto=2,
+#                            data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
+#
+# scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")

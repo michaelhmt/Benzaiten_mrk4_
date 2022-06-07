@@ -42,9 +42,4 @@ class env(object):
                     collections_data[file_name] = os.path.join(root, name)
 
         print("This is collections_data: ", collections_data)
-        # for file in list_of_files:
-        #     if file.endswith(".json"):
-        #         file_name = os.path.split(os.path.basename(file))[0]
-        #         collections_data[file_name] = file
-
         return collections_data
