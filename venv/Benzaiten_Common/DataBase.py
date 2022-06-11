@@ -32,8 +32,6 @@ class Database_Class(object):
     def open_log(self):
         # make the log if it does'nt exist
         if not os.path.exists(self.fail_log_location):
-            if self.debug_mode:
-                print("******: making log")
             with open(self.fail_log_location, 'a+') as i_log:
                 blank_log =[]
                 json.dump(blank_log, i_log, indent=4)
