@@ -8,7 +8,7 @@ import pymongo
 
 class Database_Class(object):
     def __init__(self, databasename):
-        self.client = pymongo.MongoClient("mongodb://192.168.50.238:27017")
+        self.client = pymongo.MongoClient("mongodb://192.168.50.228:49156")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
 

@@ -385,6 +385,9 @@ class ArchiveOOO(BaseScraperClass):
         for tag in chapter_group:
             chapter_text.append(tag.get_text())
 
+        print("joining a list that is this long lenght= {}".format(len(chapter_text)))
+        #print("chapter text joined is: \n{}".format(' '.join(chapter_text)))
+
         return {"1": ' '.join(chapter_text)}
 
     def ingest_full_story(self, link):
@@ -460,5 +463,5 @@ class ArchiveOOO(BaseScraperClass):
 #                            goto=2,
 #                            data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
 #
-# # scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")
-# print(scarper_class.ingest_chapter("/works/36158623"))
+# scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")
+#print(scarper_class.ingest_chapter("/works/36158623"))
