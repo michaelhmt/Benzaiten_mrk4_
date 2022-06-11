@@ -7,6 +7,7 @@ class env(object):
         self.env_dir = os.path.dirname(pathlib.Path(__file__).resolve())
         self.chrome_driver_path = os.path.join(self.env_dir, "chromedriver.exe")
         self.ingested_log_path = os.path.join(self.env_dir, "Benzaiten_Common\\Ingested_Log.json")
+        self.upload_fails = os.path.join(self.env_dir, "Benzaiten_Common\\dataBase_fail_log.json")
         self.config_path = os.path.join(self.env_dir, "config.json")
         self.data_delivery_folder = os.path.join(self.env_dir, "delivered_collections")
         self.set_env_paths()

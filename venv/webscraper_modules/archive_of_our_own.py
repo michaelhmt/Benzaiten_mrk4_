@@ -458,13 +458,13 @@ class ArchiveOOO(BaseScraperClass):
 
         return chapters
 
-from Benzaiten_Common.DataBase import Database_Class
-
-databaseclass = Database_Class("FF_Data_Cluster")
-scarper_class = ArchiveOOO("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1",
-                           search_page_constant="https://archiveofourown.org/tags/Fate*s*Grand Order/works?page={}",
-                           goto=2,
-                           data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
-
-# scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")
-print(scarper_class.ingest_chapter("/works/34019260"))
+# from Benzaiten_Common.DataBase import Database_Class
+#
+# databaseclass = Database_Class("FF_Data_Cluster")
+# scarper_class = ArchiveOOO("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1",
+#                            search_page_constant="https://archiveofourown.org/tags/Fate*s*Grand Order/works?page={}",
+#                            goto=2,
+#                            data_base_class=databaseclass,add_single_to_db=True,target_col='test_data')
+#
+# # scarper_class.ingest_searchpage("https://archiveofourown.org/tags/Fate*s*Grand Order/works?page=1")
+# print(scarper_class.ingest_chapter("/works/34019260"))

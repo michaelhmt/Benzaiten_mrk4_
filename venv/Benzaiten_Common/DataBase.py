@@ -1,6 +1,17 @@
 # coding=utf8
 from pprint import pprint
 
+# env settings
+def set_env():
+    env_dir = os.path.dirname(os.getcwd())
+    sys.path.append(env_dir)
+    print("this is env dir: ", env_dir)
+set_env()
+import Site_custom
+env_object = Site_custom.env()
+
+
+
 #site packages
 import pymongo
 
@@ -11,6 +22,38 @@ class Database_Class(object):
         self.client = pymongo.MongoClient("mongodb://192.168.50.228:49156")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
+
+        self.fail_log_location = env_object.upload_fails
+        self.fail_log = self.open_log()
+
+    def open_log(self):
+        # make the log if it does'nt exist
+        if not os.path.exists(self.fail_log_location):
+            if self.debug_mode:
+                print("******: making log")
+            with open(self.fail_log_location, 'a+') as i_log:
+                blank_log =[]
+                json.dump(blank_log, i_log, indent=4)
+
+        # get the log data
+        with open(self.fail_log_location) as log_file:
+            data = json.load(log_file)
+
+        return data
+
+
+    def add_to_log(self, data_to_add):
+        """
+        give this function a list with with [Author, link, Title]
+        :param metadata_to_add:
+        :return:
+        """
+
+        with open(self.fail_log_location, 'r+' ) as f_log:
+            current_data = json.load(f_log)
+            current_data.append(data_to_add)
+            f_log.seek(0)
+            json.dump(current_data, f_log, indent=4)
 
 
     def add_to_database(self,itemToAdd, targetCollection, print_IDs = True):
@@ -36,7 +79,9 @@ class Database_Class(object):
                 except Exception as e:
                     print("*************************************************")
                     print("well that did'nt work, got this error   {}".format(e))
+                    print("Adding data to fail log.")
                     print("*************************************************")
+                    self.add_to_log(single)
 
             try:
                 print("Adding a list of dicts")
@@ -47,7 +92,9 @@ class Database_Class(object):
             except Exception as e:
                 print("*************************************************")
                 print("well that did'nt work, got this error   {}".format(e))
+                print("Adding data to fail log.")
                 print("*************************************************")
+                self.add_to_log(single)
 
         else:
             try:
@@ -60,7 +107,9 @@ class Database_Class(object):
             except Exception as e:
                 print("*************************************************")
                 print("well that did'nt work, got this error   {}".format(e))
+                print("Adding data to fail log.")
                 print("*************************************************")
+                self.add_to_log(single)
 
 
     def get_complete_collection(self, collection_to_get):
