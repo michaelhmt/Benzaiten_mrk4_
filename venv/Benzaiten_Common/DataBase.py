@@ -95,7 +95,7 @@ class Database_Class(object):
                 print("well that did'nt work, got this error   {}".format(e))
                 print("Adding data to fail log.")
                 print("*************************************************")
-                self.add_to_log(single)
+                self.add_to_log(itemToAdd)
 
         else:
             try:
@@ -110,7 +110,7 @@ class Database_Class(object):
                 print("well that did'nt work, got this error   {}".format(e))
                 print("Adding data to fail log.")
                 print("*************************************************")
-                self.add_to_log(single)
+                self.add_to_log(itemToAdd)
 
 
     def get_complete_collection(self, collection_to_get):
