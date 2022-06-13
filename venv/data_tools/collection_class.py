@@ -185,8 +185,6 @@ class Collection_data(object):
         else:
             plt.savefig(save_tag_wordcloud, bbox_inches='tight')
 
-        plt.close(tag_wc)
-
     def get_top_tags(self, tag_data, top_range=50, with_labels=False):
         """
         Useful function for returning the most popular tags in the given tag data
@@ -278,7 +276,6 @@ class Collection_data(object):
         else:
             plt.savefig(save_summary_wordcloud, bbox_inches='tight')
 
-        plt.close(summary_wordcloud)
 
     def make_wordcloud_of_story_contents(self, given_contents=None, save_file_location=None):
         """
@@ -314,8 +311,6 @@ class Collection_data(object):
             plt.savefig(save_file_location, bbox_inches='tight')
         else:
             plt.savefig(contenst_wordcloud, bbox_inches='tight')
-
-        plt.close(contents_wordcloud)
 
     def clean_tags(self, tags_list):
         return [tag for tag in tags_list if tag not in TAG_TO_REMOVE]

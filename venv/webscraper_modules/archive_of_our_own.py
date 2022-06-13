@@ -254,7 +254,6 @@ class ArchiveOOO(BaseScraperClass):
 
         if self.restarted_attempted:
             self.restarted_attempted = False
-        #print(driver.page_source)
         return self.driver.page_source
 
     def get_browse_page_lenght(self):
@@ -376,7 +375,13 @@ class ArchiveOOO(BaseScraperClass):
         chapter_text = []
 
         chapterlink = STORY_PAGE_CONSTANT.format(url=link)
-        chapter_page = self.get_dynamic_page(chapterlink)
+        try:
+            chapter_page = self.get_dynamic_page(chapterlink)
+        except selenium.common.exceptions.TimeoutException as timeout_error:
+            print("Timed out restarting and trying again")
+            self.start_browser()
+            self.restarted_attempted = True
+            chapter_page = self.get_dynamic_page(chapterlink)
 
         chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
 
