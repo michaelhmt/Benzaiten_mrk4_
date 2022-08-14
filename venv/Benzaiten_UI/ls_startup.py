@@ -66,6 +66,7 @@ class CollectionTreeItem(QTreeWidgetItem):
 
         return _tree_item
 
+
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
         super(configured_collect_data, self).__init__()
@@ -245,9 +246,21 @@ class configured_collect_data(data_ui):
     # Data tools Tab
 
     def retrive_collection(self):
+        self.collection_display.clear()
         collection_name = self.cmbx_collections.currentText()
         self.collection = Collection_data(collection_name)
         self.disk_data = self.collection.get_collection_data()
+
+        #progress window
+        progress_win = QtWidgets.QProgressDialog("generating",'', 0, 10000, self)
+        progress_win.setLabelText("computing Data.")
+        progress_win.setWindowModality(Qt.WindowModal)
+        progress_win.setCancelButton( None)
+        progress_win.setMaximum(10000)
+        progress_win.setMinimum(0)
+        progress_win.setValue(0)
+
+        word_count = 0
 
         if not self.disk_data:
             m_box = QtWidgets.QMessageBox()
@@ -257,15 +270,34 @@ class configured_collect_data(data_ui):
             m_box.exec()
             return
 
-        self.lcdnum_entries.display(len(self.disk_data))
+        entry_number = len(self.disk_data)
+        step_size = (10000 / entry_number) + 0.9
+        progress = 0
+        self.lcdnum_entries.display(entry_number)
+        progress_win.show()
 
         for entry in self.disk_data:
+
+            word_count +=  self.word_count_of_entry(entry)
             story_item = CollectionTreeItem(entry)
             story_item.setText(0, entry['MetaData'].get('Title', "No Title"))
             story_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, 'story_icon.png'))
             story_item.setIcon(0, story_icon)
             self.collection_display.insertTopLevelItem(0, story_item)
             story_item.populate_children()
+
+            progress = progress + step_size
+            progress_win.setValue(int(progress))
+
+        print("This is word count: ", word_count)
+        self.lcdnum_word_count.display(int(word_count))
+        progress_win.close()
+
+    def word_count_of_entry(self, entry):
+        count = 0
+        for _, chapter in entry['Content'].items():
+            count += len(chapter)
+        return count
 
 
 

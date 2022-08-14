@@ -17,7 +17,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         MainWindow.resize(976, 804)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("QMainWindow{\n"
-"background: rgb(80, 80, 80);\n"
+"background: rgb(40, 40, 40);\n"
 "}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setEnabled(True)
@@ -313,6 +313,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 "    padding: 2px;\n"
 "    background: rgb(54, 54, 54);\n"
 "}")
+        self.lcdnum_word_count.setDigitCount(15)
         self.lcdnum_word_count.setObjectName("lcdnum_word_count")
         self.horizontalLayout_9.addWidget(self.lcdnum_word_count)
         self.verticalLayout_5.addLayout(self.horizontalLayout_9)

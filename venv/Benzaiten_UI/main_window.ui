@@ -18,7 +18,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow{
-background: rgb(80, 80, 80);
+background: rgb(40, 40, 40);
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -542,6 +542,9 @@ background: rgb(120, 120, 120)
     padding: 2px;
     background: rgb(54, 54, 54);
 }</string>
+              </property>
+              <property name="digitCount">
+               <number>15</number>
               </property>
              </widget>
             </item>
