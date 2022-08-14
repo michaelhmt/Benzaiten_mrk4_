@@ -10,6 +10,8 @@ class env(object):
         self.upload_fails = os.path.join(self.env_dir, "Benzaiten_Common\\dataBase_fail_log.json")
         self.config_path = os.path.join(self.env_dir, "config.json")
         self.data_delivery_folder = os.path.join(self.env_dir, "delivered_collections")
+        self.icons_folder = os.path.join(self.env_dir, "Benzaiten_UI\\icons")
+
         self.set_env_paths()
 
 

@@ -227,14 +227,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.pushButton = QtWidgets.QPushButton(self.data_info)
-        self.pushButton.setMinimumSize(QtCore.QSize(160, 50))
-        self.pushButton.setStyleSheet("QPushButton{\n"
+        self.btn_load_collection = QtWidgets.QPushButton(self.data_info)
+        self.btn_load_collection.setMinimumSize(QtCore.QSize(160, 50))
+        self.btn_load_collection.setStyleSheet("QPushButton{\n"
 "    color: rgb(220, 220, 220);\n"
 "    background: rgb(100, 100, 100);\n"
 "}")
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout_4.addWidget(self.pushButton)
+        self.btn_load_collection.setObjectName("btn_load_collection")
+        self.verticalLayout_4.addWidget(self.btn_load_collection)
         self.btn_deliver_data = QtWidgets.QPushButton(self.data_info)
         self.btn_deliver_data.setMinimumSize(QtCore.QSize(0, 20))
         self.btn_deliver_data.setStyleSheet("QPushButton{\n"
@@ -377,7 +377,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.clear_output.setText(_translate("MainWindow", "Clear Output"))
         self.start_collection.setText(_translate("MainWindow", "Start collection"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ingest_ctrls), _translate("MainWindow", "Ingestion controls"))
-        self.pushButton.setText(_translate("MainWindow", "Load collection"))
+        self.btn_load_collection.setText(_translate("MainWindow", "Load collection"))
         self.btn_deliver_data.setText(_translate("MainWindow", "deliver Data Collection"))
         self.groupBox_3.setTitle(_translate("MainWindow", "Collection to Load"))
         self.label_2.setText(_translate("MainWindow", "entries in selected data:"))

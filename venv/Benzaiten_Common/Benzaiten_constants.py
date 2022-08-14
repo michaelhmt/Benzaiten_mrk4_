@@ -11,3 +11,5 @@ COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 
 
 DRIVER_PATH = 'E:\\Python\\Benzaiten_mrk4\\chromedriver.exe' #the path where you have "chromedriver" file.
 INGESTED_LOG = 'E:\\Python\\Benzaiten_mrk4\\venv\\Benzaiten_Common\\Ingested_Log_{Fandom_Name}.json'
+
+

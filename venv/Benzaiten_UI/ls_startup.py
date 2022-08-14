@@ -39,6 +39,33 @@ config_path = env_object.config_path
 with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
+
+class CollectionTreeItem(QTreeWidgetItem):
+
+    def __init__(self, data_item):
+        super(CollectionTreeItem, self).__init__()
+        self.data = data_item
+
+    def populate_children(self):
+        author_item = self.make_tree_item(self.data['MetaData'].get('Author', "No Author"), 'author.png')
+        icon_folder = self.make_tree_item('Tags', 'tag_folder.png')
+
+        # make tag Items
+        for tag in self.data['MetaData']['Tags']:
+            tag_item = self.make_tree_item(tag, "tag_icon.png")
+            icon_folder.addChild(tag_item)
+
+        self.addChild(author_item)
+        self.addChild(icon_folder)
+
+    def make_tree_item(self, name,  icon):
+        _tree_item = QTreeWidgetItem()
+        _tree_item.setText(0, name)
+        item_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, icon))
+        _tree_item.setIcon(0, item_icon)
+
+        return _tree_item
+
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
         super(configured_collect_data, self).__init__()
@@ -55,6 +82,7 @@ class configured_collect_data(data_ui):
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
         self.clear_output.clicked.connect(lambda: self.console_output.clear())
+        self.btn_load_collection.clicked.connect(self.retrive_collection)
 
     def initui(self):
         # if you get an error here make sure data_ui inherits from QtWidgets.QMainWindow
@@ -217,7 +245,7 @@ class configured_collect_data(data_ui):
     # Data tools Tab
 
     def retrive_collection(self):
-        collection_name = self.cmbx_collections.getCurrentText()
+        collection_name = self.cmbx_collections.currentText()
         self.collection = Collection_data(collection_name)
         self.disk_data = self.collection.get_collection_data()
 
@@ -227,6 +255,21 @@ class configured_collect_data(data_ui):
             m_box.setText(msg)
             m_box.setWindowTitle("Collection not on disk")
             m_box.exec()
+            return
+
+        self.lcdnum_entries.display(len(self.disk_data))
+
+        for entry in self.disk_data:
+            story_item = CollectionTreeItem(entry)
+            story_item.setText(0, entry['MetaData'].get('Title', "No Title"))
+            story_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, 'story_icon.png'))
+            story_item.setIcon(0, story_icon)
+            self.collection_display.insertTopLevelItem(0, story_item)
+            story_item.populate_children()
+
+
+
+
 
 
 
