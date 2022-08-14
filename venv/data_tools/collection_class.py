@@ -47,6 +47,8 @@ class Collection_data(object):
         self.delivery_dir = os.path.join(env_object.data_delivery_folder, (name_of_collection + "_data_delivery"))
         utils.ensure_dir(self.delivery_dir)
 
+        self.data = None
+
         self.collection_json = None
 
     def deliver_to_folder(self):
@@ -114,14 +116,14 @@ class Collection_data(object):
         writes that data to a csv
         :return:
         """
-        data = self.get_collection_data()
+        self.data = self.get_collection_data()
 
         data_columns = ["Title", "Author", "Story Summary", "chapter Amount"]
 
         rows = []
 
         # build each of our rows
-        for collection in data:
+        for collection in self.data:
 
             rowdata = [collection['MetaData']['Title'],
                        collection['MetaData']['Author'],
@@ -457,8 +459,8 @@ class Collection_data(object):
 
 
 
-
-collection_obj = Collection_data('Hololive_data')
-collection_obj.deliver_to_folder()
-collection_obj.deliver_data()
-collection_obj.deliver_top_author_anyalsis()
+#
+# collection_obj = Collection_data('Hololive_data')
+# collection_obj.deliver_to_folder()
+# collection_obj.deliver_data()
+# collection_obj.deliver_top_author_anyalsis()

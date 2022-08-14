@@ -29,6 +29,8 @@ from PyQt5.QtGui import QPixmap
 
 from webscraper_modules.archive_of_our_own import ArchiveOOO
 from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
+from data_tools.collection_class import Collection_data
+from DataBase import Database_Class
 
 # this needs to match whats at the top of Scraper.py
 # really should be in a Json they both share
@@ -44,7 +46,7 @@ class configured_collect_data(data_ui):
         self.connect_signials()
         self.initui()
 
-        self.temp_file = temp_log_write_location = os.path.join(os.getcwd(), 'temp.json')
+        self.temp_file =  os.path.join(os.getcwd(), 'temp.json')
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
         self.console_output.installEventFilter(self)
         self.u_response = None
@@ -62,9 +64,21 @@ class configured_collect_data(data_ui):
         self.process.started.connect(lambda: self.start_collection.setEnabled(False))
         self.process.finished.connect(lambda: self.start_collection.setEnabled(True))
 
+        self.populate_ui()
+
         for website in config['web_scrapers'].keys():
             self.Ingest_mode.addItem(website)
 
+    def populate_ui(self):
+        self.populate_collections()
+
+    def populate_collections(self):
+        self.database = Database_Class('FF_Data_Cluster')
+        self.collections = self.database.collections
+
+        self.cmbx_collections.addItems(self.collections)
+
+    # Web collection tab
     def write_to_console(self):
         self.console_output.insertPlainText(self.process.readAll().data().decode("cp850"))
         try:
@@ -144,7 +158,6 @@ class configured_collect_data(data_ui):
                 config['database_collections'] = collections_lst
                 json.dump(config, coonfig_file, indent=4)
 
-
     def write_to_log(self, var_to_write):
         if not os.path.exists(self.temp_file):
             with open(self.temp_file, 'a+'):
@@ -201,6 +214,19 @@ class configured_collect_data(data_ui):
     def response(self, i):
         self.u_response = i.text()
 
+    # Data tools Tab
+
+    def retrive_collection(self):
+        collection_name = self.cmbx_collections.getCurrentText()
+        self.collection = Collection_data(collection_name)
+        self.disk_data = self.collection.get_collection_data()
+
+        if not self.disk_data:
+            m_box = QtWidgets.QMessageBox()
+            msg = "{} has not been downloaded to this machine, press \"deliver Data Collection\" to retrieve it.".format(collection_name)
+            m_box.setText(msg)
+            m_box.setWindowTitle("Collection not on disk")
+            m_box.exec()
 
 
 

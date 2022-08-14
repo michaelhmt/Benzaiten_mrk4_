@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1226, 828)
+        MainWindow.resize(976, 804)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "background: rgb(80, 80, 80);\n"
@@ -217,12 +217,136 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_2.addWidget(self.start_collection)
         self.tabWidget.addTab(self.ingest_ctrls, "")
         self.data_info = QtWidgets.QWidget()
+        self.data_info.setStyleSheet("QWidget{\n"
+"    background: rgb(80, 80, 80)\n"
+"}")
         self.data_info.setObjectName("data_info")
+        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.data_info)
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.pushButton = QtWidgets.QPushButton(self.data_info)
+        self.pushButton.setMinimumSize(QtCore.QSize(160, 50))
+        self.pushButton.setStyleSheet("QPushButton{\n"
+"    color: rgb(220, 220, 220);\n"
+"    background: rgb(100, 100, 100);\n"
+"}")
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout_4.addWidget(self.pushButton)
+        self.btn_deliver_data = QtWidgets.QPushButton(self.data_info)
+        self.btn_deliver_data.setMinimumSize(QtCore.QSize(0, 20))
+        self.btn_deliver_data.setStyleSheet("QPushButton{\n"
+"    color: rgb(220, 220, 220);\n"
+"    background: rgb(100, 100, 100);\n"
+"}")
+        self.btn_deliver_data.setObjectName("btn_deliver_data")
+        self.verticalLayout_4.addWidget(self.btn_deliver_data)
+        self.horizontalLayout_7.addLayout(self.verticalLayout_4)
+        self.groupBox_3 = QtWidgets.QGroupBox(self.data_info)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.groupBox_3.sizePolicy().hasHeightForWidth())
+        self.groupBox_3.setSizePolicy(sizePolicy)
+        self.groupBox_3.setStyleSheet("QGroupBox{\n"
+"background-color: rgb(80, 80, 80);\n"
+"}\n"
+"QGroupBox::title{\n"
+"color: rgb(220, 220, 220)\n"
+"}")
+        self.groupBox_3.setObjectName("groupBox_3")
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.groupBox_3)
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.cmbx_collections = QtWidgets.QComboBox(self.groupBox_3)
+        self.cmbx_collections.setStyleSheet("QComboBox{\n"
+"color: rgb(220, 220, 220);\n"
+"background: rgb(120, 120, 120)\n"
+"}")
+        self.cmbx_collections.setObjectName("cmbx_collections")
+        self.verticalLayout_7.addWidget(self.cmbx_collections)
+        self.horizontalLayout_7.addWidget(self.groupBox_3)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_7)
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.line = QtWidgets.QFrame(self.data_info)
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout_5.addWidget(self.line)
+        self.horizontalLayout_8 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.label_2 = QtWidgets.QLabel(self.data_info)
+        self.label_2.setStyleSheet("QLabel{\n"
+"    color: rgb(220, 220, 220);\n"
+"}")
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_8.addWidget(self.label_2)
+        self.lcdnum_entries = QtWidgets.QLCDNumber(self.data_info)
+        self.lcdnum_entries.setStyleSheet("QFrame, QLabel, QToolTip {\n"
+"    border: 2px solid rgb(0, 0, 0);\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    background: rgb(54, 54, 54);\n"
+"}")
+        self.lcdnum_entries.setObjectName("lcdnum_entries")
+        self.horizontalLayout_8.addWidget(self.lcdnum_entries)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_8)
+        self.line_2 = QtWidgets.QFrame(self.data_info)
+        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.verticalLayout_5.addWidget(self.line_2)
+        self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
+        self.label_3 = QtWidgets.QLabel(self.data_info)
+        self.label_3.setStyleSheet("QLabel{\n"
+"    color: rgb(220, 220, 220);\n"
+"}")
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout_9.addWidget(self.label_3)
+        self.lcdnum_word_count = QtWidgets.QLCDNumber(self.data_info)
+        self.lcdnum_word_count.setStyleSheet("QFrame, QLabel, QToolTip {\n"
+"    border: 2px solid rgb(0, 0, 0);\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    background: rgb(54, 54, 54);\n"
+"}")
+        self.lcdnum_word_count.setObjectName("lcdnum_word_count")
+        self.horizontalLayout_9.addWidget(self.lcdnum_word_count)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_9)
+        self.line_3 = QtWidgets.QFrame(self.data_info)
+        self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_3.setObjectName("line_3")
+        self.verticalLayout_5.addWidget(self.line_3)
+        self.btn_start_analysis = QtWidgets.QPushButton(self.data_info)
+        self.btn_start_analysis.setMinimumSize(QtCore.QSize(0, 50))
+        self.btn_start_analysis.setStyleSheet("QPushButton{\n"
+"    color: rgb(220, 220, 220);\n"
+"    background: rgb(100, 100, 100);\n"
+"}\n"
+"\n"
+"QPushButton:default{\n"
+"    color: rgb(220, 220, 220);\n"
+"    background: rgb(100, 100, 100);\n"
+"}")
+        self.btn_start_analysis.setObjectName("btn_start_analysis")
+        self.verticalLayout_5.addWidget(self.btn_start_analysis)
+        self.line_4 = QtWidgets.QFrame(self.data_info)
+        self.line_4.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_4.setObjectName("line_4")
+        self.verticalLayout_5.addWidget(self.line_4)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_5.addItem(spacerItem2)
+        self.verticalLayout_6.addLayout(self.verticalLayout_5)
         self.tabWidget.addTab(self.data_info, "")
         self.gridLayout_2.addWidget(self.tabWidget, 0, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1226, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 976, 22))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -230,7 +354,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -253,6 +377,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.clear_output.setText(_translate("MainWindow", "Clear Output"))
         self.start_collection.setText(_translate("MainWindow", "Start collection"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ingest_ctrls), _translate("MainWindow", "Ingestion controls"))
+        self.pushButton.setText(_translate("MainWindow", "Load collection"))
+        self.btn_deliver_data.setText(_translate("MainWindow", "deliver Data Collection"))
+        self.groupBox_3.setTitle(_translate("MainWindow", "Collection to Load"))
+        self.label_2.setText(_translate("MainWindow", "entries in selected data:"))
+        self.label_3.setText(_translate("MainWindow", "Total Data word count:"))
+        self.btn_start_analysis.setText(_translate("MainWindow", "Start Data Analysis"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.data_info), _translate("MainWindow", "Data Info"))
 
 

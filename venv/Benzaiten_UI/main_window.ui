@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>737</width>
-    <height>666</height>
+    <width>976</width>
+    <height>804</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -404,8 +404,27 @@ p, li { white-space: pre-wrap; }
              <widget class="QPushButton" name="pushButton">
               <property name="minimumSize">
                <size>
+                <width>160</width>
+                <height>50</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+	color: rgb(220, 220, 220);
+	background: rgb(100, 100, 100);
+}</string>
+              </property>
+              <property name="text">
+               <string>Load collection</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_deliver_data">
+              <property name="minimumSize">
+               <size>
                 <width>0</width>
-                <height>70</height>
+                <height>20</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -422,19 +441,36 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit">
-            <property name="minimumSize">
-             <size>
-              <width>70</width>
-              <height>0</height>
-             </size>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>220</width>
-              <height>16777215</height>
-             </size>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox{
+background-color: rgb(80, 80, 80);
+}
+QGroupBox::title{
+color: rgb(220, 220, 220)
+}</string>
             </property>
+            <property name="title">
+             <string>Collection to Load</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <item>
+              <widget class="QComboBox" name="cmbx_collections">
+               <property name="styleSheet">
+                <string notr="true">QComboBox{
+color: rgb(220, 220, 220);
+background: rgb(120, 120, 120)
+}</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -463,7 +499,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLCDNumber" name="lcdNumber">
+             <widget class="QLCDNumber" name="lcdnum_entries">
               <property name="styleSheet">
                <string notr="true">QFrame, QLabel, QToolTip {
     border: 2px solid rgb(0, 0, 0);
@@ -498,7 +534,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLCDNumber" name="lcdNumber_2">
+             <widget class="QLCDNumber" name="lcdnum_word_count">
               <property name="styleSheet">
                <string notr="true">QFrame, QLabel, QToolTip {
     border: 2px solid rgb(0, 0, 0);
@@ -519,7 +555,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="btn_start_analysis">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -575,8 +611,8 @@ QPushButton:default{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>737</width>
-     <height>21</height>
+     <width>976</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

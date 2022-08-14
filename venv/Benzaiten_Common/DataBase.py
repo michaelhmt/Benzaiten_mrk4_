@@ -22,7 +22,7 @@ import pymongo
 
 class Database_Class(object):
     def __init__(self, databasename):
-        self.client = pymongo.MongoClient("mongodb://192.168.50.228:49156")
+        self.client = pymongo.MongoClient("mongodb://192.168.50.228:49154")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
 
@@ -45,7 +45,7 @@ class Database_Class(object):
 
     def add_to_log(self, data_to_add):
         """
-        give this function a list with with [Author, link, Title]
+        give this function a list with [Author, link, Title]
         :param metadata_to_add:
         :return:
         """
@@ -111,6 +111,11 @@ class Database_Class(object):
                 print("Adding data to fail log.")
                 print("*************************************************")
                 self.add_to_log(itemToAdd)
+
+
+    @property
+    def collections(self):
+        return self.database.list_collection_names()
 
 
     def get_complete_collection(self, collection_to_get):
