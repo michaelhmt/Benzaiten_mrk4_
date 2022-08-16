@@ -31,6 +31,8 @@ from webscraper_modules.archive_of_our_own import ArchiveOOO
 from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
 from data_tools.collection_class import Collection_data
 from DataBase import Database_Class
+from Benzaiten_UI.ui_widgets.author_info import
+
 
 # this needs to match whats at the top of Scraper.py
 # really should be in a Json they both share
@@ -40,26 +42,33 @@ with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 
+class CollectionTreeChildItem(QTreeWidgetItem):
+    item_type = "No Type"
+
+
+
 class CollectionTreeItem(QTreeWidgetItem):
+    item_type = "Story"
 
     def __init__(self, data_item):
         super(CollectionTreeItem, self).__init__()
         self.data = data_item
 
     def populate_children(self):
-        author_item = self.make_tree_item(self.data['MetaData'].get('Author', "No Author"), 'author.png')
-        icon_folder = self.make_tree_item('Tags', 'tag_folder.png')
+        author_item = self.make_tree_item(self.data['MetaData'].get('Author', "No Author"), 'author.png', "author")
+        icon_folder = self.make_tree_item('Tags', 'tag_folder.png', "tag_folder")
 
         # make tag Items
         for tag in self.data['MetaData']['Tags']:
-            tag_item = self.make_tree_item(tag, "tag_icon.png")
+            tag_item = self.make_tree_item(tag, "tag_icon.png", "tag")
             icon_folder.addChild(tag_item)
 
         self.addChild(author_item)
         self.addChild(icon_folder)
 
-    def make_tree_item(self, name,  icon):
-        _tree_item = QTreeWidgetItem()
+    def make_tree_item(self, name,  icon, type):
+        _tree_item = CollectionTreeChildItem()
+        _tree_item.item_type = type
         _tree_item.setText(0, name)
         item_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, icon))
         _tree_item.setIcon(0, item_icon)
@@ -85,6 +94,15 @@ class configured_collect_data(data_ui):
         self.clear_output.clicked.connect(lambda: self.console_output.clear())
         self.btn_load_collection.clicked.connect(self.retrive_collection)
 
+        self.collection_display.itemChanged.connect(self.populated_selected_item_info)
+
+    def populated_selected_item_info(self):
+        selected_item = self.collection_display.selectedItems()[0]
+
+
+
+
+
     def initui(self):
         # if you get an error here make sure data_ui inherits from QtWidgets.QMainWindow
         self.process = QtCore.QProcess(self)
@@ -103,7 +121,10 @@ class configured_collect_data(data_ui):
 
     def populate_collections(self):
         self.database = Database_Class('FF_Data_Cluster')
-        self.collections = self.database.collections
+        if not self.database.collections:
+            self.collections = config['database_collections']
+        else:
+            self.collections = self.database.collections
 
         self.cmbx_collections.addItems(self.collections)
 

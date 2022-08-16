@@ -115,7 +115,10 @@ class Database_Class(object):
 
     @property
     def collections(self):
-        return self.database.list_collection_names()
+        try:
+            return self.database.list_collection_names()
+        except:
+            return None
 
 
     def get_complete_collection(self, collection_to_get):

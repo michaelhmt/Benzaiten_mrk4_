@@ -90,7 +90,7 @@ class Collection_data(object):
                 print("no delivered file found please run, deliver_to_folder first")
                 return None
 
-        with open(self.collection_json) as data_file:
+        with open(self.collection_json, encoding="utf8") as data_file:
             data = json.load(data_file)
         return data
 
@@ -317,6 +317,38 @@ class Collection_data(object):
     def clean_tags(self, tags_list):
         return [tag for tag in tags_list if tag not in TAG_TO_REMOVE]
 
+    def get_single_tag_data(self, tag):
+
+        collection = self.get_collection_data()
+        this_tag_data = {}
+
+        for story in collection:
+            story_tags = set(self.clean_tags(story['MetaData']['Tags']))
+            # If this is not prsent we have no reason to look at this story
+            if tag not in story_tags:
+                continue
+            for s_tag in story_tags:
+                # we don't need to process the data we are looking at
+                if s_tag is tag:
+                    continue
+                # keep a count of what tags show up wih this tag
+                if tag not in this_tag_data.keys():
+                    this_tag_data[s_tag] = 1
+                else:
+                    this_tag_data[s_tag] += 1
+
+        top_5_related = {}
+        for i in range(5):
+            # just in case tag data is empty
+            if not this_tag_data:
+                continue
+
+            # get the top tag out and store it in our dict
+            top_tag = max(this_tag_data, key=this_tag_data.get)
+            top_5_related[top_tag] = this_tag_data[top_tag]
+            del this_tag_data[top_tag]
+
+        return top_5_related
 
     def make_author_data(self):
         data = self.get_collection_data()
@@ -412,14 +444,14 @@ class Collection_data(object):
         summary_cloud_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_summary_wordcloud.png"))
         chapters_cloud_delivery_location = os.path.join(self.delivery_dir, (self.collection_name + "_chapters_wordcloud.png"))
 
-        tag_data = self.get_tag_data(self.get_collection_data())
+        self.tag_data = self.get_tag_data(self.get_collection_data())
 
         print("making CSV")
         self.make_data_frame(csv_delivery_location)
         print("Making Pie chart of tags")
-        self.make_pie_chart_of_tags(tag_data, save_file_location=pie_chart_delivery_location)
+        self.make_pie_chart_of_tags(self.tag_data, save_file_location=pie_chart_delivery_location)
         print("making word cloud of tags")
-        self.make_word_cloud_of_tags(tag_data, save_file_location=tag_cloud_delivery_location)
+        self.make_word_cloud_of_tags(self.tag_data, save_file_location=tag_cloud_delivery_location)
         print("making wordcloud of summary")
         self.make_wordcloud_of_summary(save_file_location=summary_cloud_delivery_location)
         print("Making word cloud of contents")
