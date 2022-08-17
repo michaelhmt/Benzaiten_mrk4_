@@ -589,6 +589,26 @@ QPushButton:default{
            </widget>
           </item>
           <item>
+           <layout class="QVBoxLayout" name="Info_layout">
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Minimum</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -615,7 +635,7 @@ QPushButton:default{
      <x>0</x>
      <y>0</y>
      <width>976</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

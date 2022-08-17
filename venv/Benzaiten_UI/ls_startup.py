@@ -16,6 +16,7 @@ set_env()
 import Site_custom
 env_object = Site_custom.env()
 
+import Benzaiten_Common.utils as b_utils
 from collect_data import Ui_MainWindow as data_ui
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
@@ -31,7 +32,10 @@ from webscraper_modules.archive_of_our_own import ArchiveOOO
 from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
 from data_tools.collection_class import Collection_data
 from DataBase import Database_Class
-from Benzaiten_UI.ui_widgets.author_info import
+from Benzaiten_UI.ui_widgets.author_info import AuthorInfo
+from Benzaiten_UI.ui_widgets.story_info import StoryInfo
+from Benzaiten_UI.ui_widgets.tag_info import TagInfo
+
 
 
 # this needs to match whats at the top of Scraper.py
@@ -76,6 +80,12 @@ class CollectionTreeItem(QTreeWidgetItem):
         return _tree_item
 
 
+def clear_layout(layout):
+    for i in reversed(range(layout.count())):
+        print(layout.itemAt(i))
+        layout.removeItem(layout.itemAt(i))
+
+
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
         super(configured_collect_data, self).__init__()
@@ -94,13 +104,30 @@ class configured_collect_data(data_ui):
         self.clear_output.clicked.connect(lambda: self.console_output.clear())
         self.btn_load_collection.clicked.connect(self.retrive_collection)
 
-        self.collection_display.itemChanged.connect(self.populated_selected_item_info)
+        self.collection_display.currentItemChanged.connect(self.populated_selected_item_info)
+
+    def make_sub_widget(self, widget_class):
+        base_widget = QtWidgets.QWidget(parent=self)
+        sub_widget = widget_class()
+        sub_widget.setupUi(base_widget)
+        base_widget.show()
+        sub_widget.show()
+        return sub_widget
 
     def populated_selected_item_info(self):
-        selected_item = self.collection_display.selectedItems()[0]
+        selected_item = self.collection_display.currentItem()
+        if not selected_item:
+            print("Nothing selected")
+            return
+        clear_layout(self.Info_layout)
 
+        print("This is selected_item.item_type: ", selected_item.item_type)
 
-
+        if selected_item.item_type is "Story":
+            print("Adding a story_info widget")
+            story_info_widget = self.make_sub_widget(StoryInfo)
+            story_info_widget.label_2.setText(str(b_utils.word_count_of_story(selected_item.data)))
+            self.Info_layout.addWidget(story_info_widget)
 
 
     def initui(self):
