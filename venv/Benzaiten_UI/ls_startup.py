@@ -295,11 +295,10 @@ class configured_collect_data(data_ui):
     # Data tools Tab
 
     def deliver_collection(self):
-        print("starting Download of: {}".format(collection_name))
 
         collection_name = self.cmbx_collections.currentText()
+        print("starting Download of: {}".format(collection_name))
         self.collection = Collection_data(collection_name)
-
         print("downloaded {}".format(collection_name))
 
 
