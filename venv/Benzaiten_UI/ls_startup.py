@@ -105,6 +105,7 @@ class configured_collect_data(data_ui):
         self.btn_load_collection.clicked.connect(self.retrive_collection)
 
         self.collection_display.currentItemChanged.connect(self.populated_selected_item_info)
+        self.btn_deliver_data.clicked.connnect(self.deliver_collection)
 
     def make_sub_widget(self, widget_class):
         base_widget = QtWidgets.QWidget(parent=self)
@@ -292,6 +293,16 @@ class configured_collect_data(data_ui):
         self.u_response = i.text()
 
     # Data tools Tab
+
+    def deliver_collection(self):
+        print("starting Download of: {}".format(collection_name))
+
+        collection_name = self.cmbx_collections.currentText()
+        self.collection = Collection_data(collection_name)
+
+        print("downloaded {}".format(collection_name))
+
+
 
     def retrive_collection(self):
         self.collection_display.clear()
