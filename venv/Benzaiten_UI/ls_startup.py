@@ -106,6 +106,7 @@ class configured_collect_data(data_ui):
 
         self.collection_display.currentItemChanged.connect(self.populated_selected_item_info)
         self.btn_deliver_data.clicked.connect(self.deliver_collection)
+        self.btn_start_analysis.clicked.connect(self.analyse_current_collection)
 
     def make_sub_widget(self, widget_class):
         base_widget = QtWidgets.QWidget(parent=self)
@@ -350,6 +351,11 @@ class configured_collect_data(data_ui):
         print("This is word count: ", word_count)
         self.lcdnum_word_count.display(int(word_count))
         progress_win.close()
+
+    def analyse_current_collection(self):
+        if self.collection:
+            self.collection.deliver_data()
+            self.collection.deliver_top_author_anyalsis()
 
     def word_count_of_entry(self, entry):
         count = 0
