@@ -22,7 +22,7 @@ import pymongo
 
 class Database_Class(object):
     def __init__(self, databasename):
-        self.client = pymongo.MongoClient("mongodb://192.168.50.228:49154")
+        self.client = pymongo.MongoClient("mongodb://192.168.50.228:49153")
         self.database_name = "{0}".format(databasename)
         self.database = self.client[self.database_name]
 
@@ -49,14 +49,18 @@ class Database_Class(object):
         :param metadata_to_add:
         :return:
         """
+        try:
+            print("Adding the following to fail log: {}".format(data_to_add))
 
-        print("Adding the following to fail log: {}".format(data_to_add))
+            with open(self.fail_log_location, 'r+' ) as f_log:
+                current_data = json.load(f_log)
+                current_data.append(data_to_add)
+                f_log.seek(0)
+                json.dump(current_data, f_log, indent=4)
 
-        with open(self.fail_log_location, 'r+' ) as f_log:
-            current_data = json.load(f_log)
-            current_data.append(data_to_add)
-            f_log.seek(0)
-            json.dump(current_data, f_log, indent=4)
+        except Exception as e:
+            print("Got this exception adding to log: {}".format(e))
+
 
 
     def add_to_database(self,itemToAdd, targetCollection, print_IDs = True):
