@@ -50,6 +50,8 @@ class Database_Class(object):
         :return:
         """
 
+        print("Adding the following to fail log: {}".format(data_to_add))
+
         with open(self.fail_log_location, 'r+' ) as f_log:
             current_data = json.load(f_log)
             current_data.append(data_to_add)
