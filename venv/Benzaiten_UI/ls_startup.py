@@ -125,7 +125,7 @@ class configured_collect_data(data_ui):
 
         print("This is selected_item.item_type: ", selected_item.item_type)
 
-        if selected_item.item_type is "Story":
+        if selected_item.item_type == "Story":
             print("Adding a story_info widget")
             story_info_widget = self.make_sub_widget(StoryInfo)
             story_info_widget.label_2.setText(str(b_utils.word_count_of_story(selected_item.data)))

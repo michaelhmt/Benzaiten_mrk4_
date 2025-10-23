@@ -1,7 +1,8 @@
-# buildt in
+# built-in
 import os
 import sys
 import json
+from pathlib import Path
 from pprint import pprint
 import copy
 import time
@@ -23,15 +24,37 @@ from wordcloud import STOPWORDS
 
 # Benzaiten imports
 from Benzaiten_Common.DataBase import Database_Class
+from Benzaiten_Common.logging_config import get_logger
 import Benzaiten_Common.utils as utils
 
-dump_csv = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\preview.csv"
-save_tag_chart = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_breakdown.png"
-save_tag_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\tag_wordcloud.png"
-save_summary_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\summary_wordcloud.png"
-contenst_wordcloud = "E:\\Python\\Benzaiten_mrk4\\venv\\delivered_collections\\contents_wordcloud.png"
+logger = get_logger(__name__)
 
-TAG_TO_REMOVE = ["No Archive Warnings Apply", "Virtual Streamer Animated Characters", "Creator Chose Not To Use Archive Warnings"]
+
+def load_config():
+    """Load configuration from config.json"""
+    config_path = Path(__file__).parent.parent / "config.json"
+    with open(config_path, 'r') as f:
+        return json.load(f)
+
+
+# Load config and get settings
+config = load_config()
+analysis_config = config.get('analysis', {})
+
+# Use env_object for paths (these are relative to the project)
+delivery_base = env_object.data_delivery_folder
+dump_csv = os.path.join(delivery_base, "preview.csv")
+save_tag_chart = os.path.join(delivery_base, "tag_breakdown.png")
+save_tag_wordcloud = os.path.join(delivery_base, "tag_wordcloud.png")
+save_summary_wordcloud = os.path.join(delivery_base, "summary_wordcloud.png")
+contents_wordcloud = os.path.join(delivery_base, "contents_wordcloud.png")
+
+# Get from config
+TAG_TO_REMOVE = analysis_config.get('tags_to_remove', [
+    "No Archive Warnings Apply",
+    "Virtual Streamer Animated Characters",
+    "Creator Chose Not To Use Archive Warnings"
+])
 
 
 
