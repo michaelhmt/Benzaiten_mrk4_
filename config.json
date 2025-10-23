@@ -1,0 +1,46 @@
+{
+    "database": {
+        "host": "192.168.50.228",
+        "port": 49153,
+        "connection_string": "mongodb://192.168.50.228:49153",
+        "cluster_name": "FF_Data_Cluster",
+        "timeout_ms": 5000
+    },
+    "web_scrapers": {
+        "FanFicNet": "FanfictionNetScraper",
+        "ArchiveOfOurOwn": "ArchiveOOO"
+    },
+    "scraper_settings": {
+        "default_delay": 9,
+        "page_load_timeout": 30,
+        "max_retries": 3,
+        "retry_backoff_base": 2,
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.116 Safari/537.36",
+        "headless": true,
+        "window_size": "1024x1400"
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "file": "benzaiten.log",
+        "console_output": true
+    },
+    "database_collections": [
+        "Hololive_data",
+        "FateGo_data",
+        "mlp_data",
+        "Beyblade_data"
+    ],
+    "analysis": {
+        "default_top_tags": 50,
+        "wordcloud_max_words": 450,
+        "wordcloud_width": 1200,
+        "wordcloud_height": 700,
+        "chart_figsize": [40, 35],
+        "tags_to_remove": [
+            "No Archive Warnings Apply",
+            "Virtual Streamer Animated Characters",
+            "Creator Chose Not To Use Archive Warnings"
+        ]
+    }
+}
