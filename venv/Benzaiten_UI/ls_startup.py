@@ -16,6 +16,7 @@ set_env()
 import Site_custom
 env_object = Site_custom.env()
 
+import Benzaiten_Common.utils as b_utils
 from collect_data import Ui_MainWindow as data_ui
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
@@ -29,6 +30,13 @@ from PyQt5.QtGui import QPixmap
 
 from webscraper_modules.archive_of_our_own import ArchiveOOO
 from webscraper_modules.fanfiction_net_scraper import FanfictionNetScraper
+from data_tools.collection_class import Collection_data
+from DataBase import Database_Class
+from Benzaiten_UI.ui_widgets.author_info import AuthorInfo
+from Benzaiten_UI.ui_widgets.story_info import StoryInfo
+from Benzaiten_UI.ui_widgets.tag_info import TagInfo
+
+
 
 # this needs to match whats at the top of Scraper.py
 # really should be in a Json they both share
@@ -37,6 +45,47 @@ config_path = env_object.config_path
 with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
+
+class CollectionTreeChildItem(QTreeWidgetItem):
+    item_type = "No Type"
+
+
+
+class CollectionTreeItem(QTreeWidgetItem):
+    item_type = "Story"
+
+    def __init__(self, data_item):
+        super(CollectionTreeItem, self).__init__()
+        self.data = data_item
+
+    def populate_children(self):
+        author_item = self.make_tree_item(self.data['MetaData'].get('Author', "No Author"), 'author.png', "author")
+        icon_folder = self.make_tree_item('Tags', 'tag_folder.png', "tag_folder")
+
+        # make tag Items
+        for tag in self.data['MetaData']['Tags']:
+            tag_item = self.make_tree_item(tag, "tag_icon.png", "tag")
+            icon_folder.addChild(tag_item)
+
+        self.addChild(author_item)
+        self.addChild(icon_folder)
+
+    def make_tree_item(self, name,  icon, type):
+        _tree_item = CollectionTreeChildItem()
+        _tree_item.item_type = type
+        _tree_item.setText(0, name)
+        item_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, icon))
+        _tree_item.setIcon(0, item_icon)
+
+        return _tree_item
+
+
+def clear_layout(layout):
+    for i in reversed(range(layout.count())):
+        print(layout.itemAt(i))
+        layout.removeItem(layout.itemAt(i))
+
+
 class configured_collect_data(data_ui):
     def __init__(self, mainwindow):
         super(configured_collect_data, self).__init__()
@@ -44,7 +93,7 @@ class configured_collect_data(data_ui):
         self.connect_signials()
         self.initui()
 
-        self.temp_file = temp_log_write_location = os.path.join(os.getcwd(), 'temp.json')
+        self.temp_file =  os.path.join(os.getcwd(), 'temp.json')
         self.console_output_scroll_bar = self.console_output.verticalScrollBar()
         self.console_output.installEventFilter(self)
         self.u_response = None
@@ -53,6 +102,35 @@ class configured_collect_data(data_ui):
     def connect_signials(self):
         self.start_collection.clicked.connect(self.start_collection_function)
         self.clear_output.clicked.connect(lambda: self.console_output.clear())
+        self.btn_load_collection.clicked.connect(self.retrive_collection)
+
+        self.collection_display.currentItemChanged.connect(self.populated_selected_item_info)
+        self.btn_deliver_data.clicked.connect(self.deliver_collection)
+        self.btn_start_analysis.clicked.connect(self.analyse_current_collection)
+
+    def make_sub_widget(self, widget_class):
+        base_widget = QtWidgets.QWidget(parent=self)
+        sub_widget = widget_class()
+        sub_widget.setupUi(base_widget)
+        base_widget.show()
+        sub_widget.show()
+        return sub_widget
+
+    def populated_selected_item_info(self):
+        selected_item = self.collection_display.currentItem()
+        if not selected_item:
+            print("Nothing selected")
+            return
+        clear_layout(self.Info_layout)
+
+        print("This is selected_item.item_type: ", selected_item.item_type)
+
+        if selected_item.item_type == "Story":
+            print("Adding a story_info widget")
+            story_info_widget = self.make_sub_widget(StoryInfo)
+            story_info_widget.label_2.setText(str(b_utils.word_count_of_story(selected_item.data)))
+            self.Info_layout.addWidget(story_info_widget)
+
 
     def initui(self):
         # if you get an error here make sure data_ui inherits from QtWidgets.QMainWindow
@@ -62,9 +140,24 @@ class configured_collect_data(data_ui):
         self.process.started.connect(lambda: self.start_collection.setEnabled(False))
         self.process.finished.connect(lambda: self.start_collection.setEnabled(True))
 
+        self.populate_ui()
+
         for website in config['web_scrapers'].keys():
             self.Ingest_mode.addItem(website)
 
+    def populate_ui(self):
+        self.populate_collections()
+
+    def populate_collections(self):
+        self.database = Database_Class('FF_Data_Cluster')
+        if not self.database.collections:
+            self.collections = config['database_collections']
+        else:
+            self.collections = self.database.collections
+
+        self.cmbx_collections.addItems(self.collections)
+
+    # Web collection tab
     def write_to_console(self):
         self.console_output.insertPlainText(self.process.readAll().data().decode("cp850"))
         try:
@@ -144,7 +237,6 @@ class configured_collect_data(data_ui):
                 config['database_collections'] = collections_lst
                 json.dump(config, coonfig_file, indent=4)
 
-
     def write_to_log(self, var_to_write):
         if not os.path.exists(self.temp_file):
             with open(self.temp_file, 'a+'):
@@ -200,6 +292,79 @@ class configured_collect_data(data_ui):
 
     def response(self, i):
         self.u_response = i.text()
+
+    # Data tools Tab
+
+    def deliver_collection(self):
+
+        collection_name = self.cmbx_collections.currentText()
+        print("starting Download of: {}".format(collection_name))
+        self.collection = Collection_data(collection_name)
+        print("downloaded {}".format(collection_name))
+
+
+
+    def retrive_collection(self):
+        self.collection_display.clear()
+        collection_name = self.cmbx_collections.currentText()
+        self.collection = Collection_data(collection_name)
+        self.disk_data = self.collection.get_collection_data()
+
+        #progress window
+        progress_win = QtWidgets.QProgressDialog("generating",'', 0, 10000, self)
+        progress_win.setLabelText("computing Data.")
+        progress_win.setWindowModality(Qt.WindowModal)
+        progress_win.setCancelButton( None)
+        progress_win.setMaximum(10000)
+        progress_win.setMinimum(0)
+        progress_win.setValue(0)
+
+        word_count = 0
+
+        if not self.disk_data:
+            m_box = QtWidgets.QMessageBox()
+            msg = "{} has not been downloaded to this machine, press \"deliver Data Collection\" to retrieve it.".format(collection_name)
+            m_box.setText(msg)
+            m_box.setWindowTitle("Collection not on disk")
+            m_box.exec()
+            return
+
+        entry_number = len(self.disk_data)
+        step_size = (10000 / entry_number) + 0.9
+        progress = 0
+        self.lcdnum_entries.display(entry_number)
+        progress_win.show()
+
+        for entry in self.disk_data:
+
+            word_count +=  self.word_count_of_entry(entry)
+            story_item = CollectionTreeItem(entry)
+            story_item.setText(0, entry['MetaData'].get('Title', "No Title"))
+            story_icon = QtGui.QIcon(os.path.join(env_object.icons_folder, 'story_icon.png'))
+            story_item.setIcon(0, story_icon)
+            self.collection_display.insertTopLevelItem(0, story_item)
+            story_item.populate_children()
+
+            progress = progress + step_size
+            progress_win.setValue(int(progress))
+
+        print("This is word count: ", word_count)
+        self.lcdnum_word_count.display(int(word_count))
+        progress_win.close()
+
+    def analyse_current_collection(self):
+        if self.collection:
+            self.collection.deliver_data()
+            self.collection.deliver_top_author_anyalsis()
+
+    def word_count_of_entry(self, entry):
+        count = 0
+        for _, chapter in entry['Content'].items():
+            count += len(chapter)
+        return count
+
+
+
 
 
 

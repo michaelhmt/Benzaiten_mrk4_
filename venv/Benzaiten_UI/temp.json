@@ -1,1 +1,1 @@
-"{'target_url': 'https://archiveofourown.org/works/search?&work_search%5Bquery%5D=hololive&page={}', 'page_limt': 1, 'add_to_db': 2, 'page_to_start': 0, 'debug': 0, 'website_mode': 'ArchiveOfOurOwn', 'target_col': 'Hololive_data'}"
+"{'target_url': 'https://archiveofourown.org/tags/Fate*s*Grand%20Order/works?page={}', 'page_limt': 700, 'add_to_db': 2, 'page_to_start': 0, 'debug': 2, 'website_mode': 'ArchiveOfOurOwn', 'target_col': 'FateGo_data'}"

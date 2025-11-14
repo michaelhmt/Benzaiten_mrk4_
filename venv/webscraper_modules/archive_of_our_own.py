@@ -1,462 +1,469 @@
 # -*- coding: utf-8 -*-
 # coding=utf8
 
-#buildt in
+"""
+Archive of Our Own web scraper with browser management and logging
+"""
+
+# built-in
 import os
 import sys
 import json
 import time
-
+from pathlib import Path
+from typing import Optional, Dict, List
 
 # env settings
 def set_env():
     env_dir = os.path.dirname(os.getcwd())
     sys.path.append(env_dir)
-    print("this is env dir: ", env_dir)
 set_env()
+
 import Site_custom
 env_object = Site_custom.env()
 
-#site packages
-import zlib
+# site packages
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from bs4 import BeautifulSoup
 
 # Benzaiten packages
 from webscraper_modules.scraper_baseclass import BaseScraperClass
+from Benzaiten_Common.browser_manager import BrowserManager
+from Benzaiten_Common.logging_config import get_logger
 
+logger = get_logger(__name__)
 
-HEADER_ = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.116 Safari/537.36'}
+# Constants
+HEADER_ = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.116 Safari/537.36'}
 STORY_PAGE_CONSTANT = 'https://archiveofourown.org{url}?view_adult=true">Proceed'
 STORY_INDEX_CONSTANT = "https://archiveofourown.org{url}/navigate"
 SEARCHPAGE_CONSTANT = 'https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works?page={}'
-VIEW_ALL_CONSTANT ="https://archiveofourown.org{url}?view_adult=true&view_full_work=true" #MIGHT THROW AN ERROR WITH MATURE CONTENT
-
-COOKIES_CONSTANT = {'domain': 'archiveofourown.org', 'httpOnly': False, 'name': 'view_adult', 'path': '/', 'secure': False, 'value': 'true'}
+VIEW_ALL_CONSTANT = "https://archiveofourown.org{url}?view_adult=true&view_full_work=true"
 
 DRIVER_PATH = env_object.chrome_driver_path
 INGESTED_LOG = env_object.ingested_log_path
 
 
-class ArchiveOOO(BaseScraperClass):
+def load_config():
+    """Load configuration from config.json"""
+    config_path = Path(__file__).parent.parent / "config.json"
+    with open(config_path, 'r') as f:
+        return json.load(f)
 
-    def __init__(self, url, goto=None, delay=9,
-                 search_page_constant=SEARCHPAGE_CONSTANT,
-                 debug_mode=False, data_base_class=None,
-                 add_single_to_db=False, target_col=None):
+
+class ArchiveOfOurOwnScraper(BaseScraperClass):
+    """Archive of Our Own scraper with improved error handling and logging"""
+
+    def __init__(self,
+                 url: str,
+                 goto: Optional[int] = None,
+                 delay: Optional[int] = None,
+                 search_page_constant: str = SEARCHPAGE_CONSTANT,
+                 debug_mode: bool = False,
+                 data_base_class=None,
+                 add_single_to_db: bool = False,
+                 target_col: Optional[str] = None):
         """
-        will be given root starting page of a archive our our own index page, will go to the next page from there
-        :param url: str: the root index page
+        Initialize scraper
+
+        Args:
+            url: Base URL for search pages
+            goto: Page number limit (None for no limit)
+            delay: Delay between requests (defaults to config)
+            search_page_constant: URL template for search pages
+            debug_mode: Enable debug logging
+            data_base_class: Database instance for storage
+            add_single_to_db: Add stories individually vs batching
+            target_col: Target collection name
         """
-        print("Starting Ingest Class..")
+        super().__init__(url, goto, delay, search_page_constant, debug_mode, data_base_class, add_single_to_db, target_col)
+
+        logger.info(f"Initializing ArchiveOfOurOwnScraper with URL: {url}")
+
+        self.config = load_config()
+        scraper_config = self.config.get('scraper_settings', {})
+
+        self.root_url = url
+        self.limit = goto
+        self.delay = delay or scraper_config.get('default_delay', 9)
+        self.search_page_constant = search_page_constant
         self.debug_mode = debug_mode
-        self.ingested_log = self.open_ingested_log()
         self.data_base = data_base_class
         self.add_singles = add_single_to_db
         self.target_col = target_col
 
-        self.search_page_constant = search_page_constant
-        self.delay = delay
-        self.root_url = url
-        self.root = self.get_page(self.root_url)
-        self.root_soup = BeautifulSoup(self.root.content, 'html.parser')
-        self.limt = goto
-        self.start_browser()
+        self.ingested_log = self.open_ingested_log()
 
-    def start_browser(self):
-        if self.debug_mode:
-            print("******: starting headles chrom browser")
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        #chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_argument("--window-size=1024x1400")
-        s=Service(DRIVER_PATH)
-        if self.debug_mode:
-            print("******: created browser options")
-
-        if self.debug_mode:
-            print("******: starting driver")
-        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        # Get initial page info with static request
+        logger.info("Fetching initial page with requests library")
+        self.root = requests.get(self.root_url, headers=HEADER_)
         time.sleep(self.delay)
-        page = self.driver.get('https://archiveofourown.org/works/29832528?view_full_work=true') #know link for triggering adult contant
+        self.root_soup = BeautifulSoup(self.root.content, 'html.parser')
 
-        wait = WebDriverWait(self.driver, 10)
-        if self.debug_mode:
-            print("******: auto completeing page")
-        time.sleep(5) #box takes a second or 2 to appear
+        # Initialize browser manager for dynamic content
+        self.browser_manager = BrowserManager(
+            headless=scraper_config.get('headless', True),
+            use_undetected=False,
+            driver_path=DRIVER_PATH
+        )
+        self.browser_manager.start_browser()
 
-        I_agree = wait.until(EC.presence_of_element_located((By.ID, 'tos_agree')))
-        I_agree.click()
+        # Handle adult content warning on AO3
+        self._handle_adult_content_warning()
 
-        I_agree_button = wait.until(EC.presence_of_element_located((By.ID, 'accept_tos')))
-        I_agree_button.click()
+        logger.info("ArchiveOfOurOwnScraper initialized successfully")
 
-        proceed = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Proceed")))
-        proceed.click()
-        # now we can query any page without derailing the entire script
-
-    def ingest(self, search_page_to_ingest):
-        """
-        assume root is popoulated and also grab the current page  and decides how far we go
-        This one might be moved to the scraper class so we can add to the DB
-
-        THIS IS REDUNDANT
-
-        :return:
-        """
-        urlsplit = self.root_url.split('=')
+    def _handle_adult_content_warning(self):
+        """Navigate through Archive of Our Own's adult content warning"""
         try:
-            current_page = int(urlsplit[-1])
-        except TypeError:
-            print("Unexpected Url format")
-            return None
+            logger.info("Handling AO3 adult content warning")
+            test_url = 'https://archiveofourown.org/works/29832528?view_full_work=true'
+            self.browser_manager.driver.get(test_url)
 
-        pageMax = self.get_browse_page_lenght(self.root_soup)
+            wait = WebDriverWait(self.browser_manager.driver, 10)
+            time.sleep(5)  # Wait for warning box to appear
 
-        if self.limt == None:
-            limt = pageMax
-        else:
-            limt = self.limt
+            # Accept terms of service
+            logger.debug("Clicking TOS agreement")
+            tos_agree = wait.until(EC.presence_of_element_located((By.ID, 'tos_agree')))
+            tos_agree.click()
 
+            tos_button = wait.until(EC.presence_of_element_located((By.ID, 'accept_tos')))
+            tos_button.click()
 
-        if limt < current_page:
-            print("Cant ingest with a limt smaller than the start page, set a limt that is the page number to stop on.")
+            # Click proceed button
+            proceed = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Proceed")))
+            proceed.click()
 
-        print("--- Ingesting up to page {}".format(limt))
+            logger.info("Successfully handled adult content warning")
 
-        for page in range(limt):
-            print("ingesting page {} of {}".format(current_page,limt))
-            self.ingest_searchpage(current_page)
-            print("finished ingesting page {}".format(current_page))
-            current_page =+ 1
+        except TimeoutException:
+            logger.warning("Timeout waiting for adult content warning elements (may already be accepted)")
+        except Exception as e:
+            logger.error(f"Error handling adult content warning: {e}", exc_info=True)
 
-    def ingest_searchpage(self, pagenum):
+    def get_page(self, url: str) -> requests.Response:
         """
-        This is where we wil iterate across the seach pages
-        :param pagenum: the current page number we are on
-        :return:
+        Get static page with requests library
+
+        Args:
+            url: URL to fetch
+
+        Returns:
+            requests.Response object
         """
-        story_Batch = []
-        if self.debug_mode:
-            print("******: LOOKING AT SEARCH PAGE")
-
-        searchpage_url = self.search_page_constant.format(pagenum)
-        searcpage = self.get_page(searchpage_url)
-
-        searcpage_soup = BeautifulSoup(searcpage.content, 'html.parser')
-        if self.debug_mode:
-            print("******: making search page soup")
-        story_list = searcpage_soup.find_all(role='article')
-
-        def estimate(chapters):
-            """
-            Not used any more used to estimate how long it would take to ingest a story based on the number of chapters
-            :param chapters:
-            :return:
-            """
-            try:
-                chapters_num = int(chapters)
-            except ValueError:
-                return "Dont know"
-
-            estimate = (self.delay * chapters_num)
-            if estimate >= 60:
-                return "{} Minute(s)".format(estimate/60)
-            else:
-                return "{} Seconds".format(estimate)
-
-
-
-        for count, story in enumerate(story_list):
-            if self.debug_mode:
-                print("******: in search page iteration loop")
-            story_object = {}
-            story_metadata = self.get_Story_meta_data(story)
-            story_object['MetaData'] = story_metadata
-
-            if story_metadata == '<_STORY NOT IN ENGLISH_>':
-                print("\n-------------------------------------------")
-                print("story is not in English, moving onto next one")
-                print("\n-------------------------------------------")
-                continue
-
-            metadata_log = self.check_ingested_log(story_metadata)
-
-            if metadata_log == False:
-                print("\n-------------------------------------------")
-                print("Story has already been Ingested, skipping")
-                print("\n-------------------------------------------")
-                continue
-
-            Time_to_complete = estimate(story_metadata['Chapters'])
-            print(Time_to_complete)
-            print("Starting ingest of {title}, it has {ch} chapters".format(title=story_metadata['Title'].encode('utf-8'),
-                                                                            ch=story_metadata['Chapters'],))
-            print("Ingesting story {} of {} in current batch".format(count, len(story_list)))
-            story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'])
-            print("----------Finished Ingest----------------")
-            story_object['Content'] = story_content
-
-            if self.add_singles and self.data_base:
-                self.data_base.add_to_database(itemToAdd=story_object,
-                                               targetCollection=self.target_col,
-                                               print_IDs=True)
-            else:
-                story_Batch.append(story_object)
-
-        for story in story_Batch:
-            print("\n--------------\n")
-
-        return story_Batch
-
-    def get_page(self, url):
-        """
-        gets the static html of a webpage then wait for 10 seconds
-        :param url:
-        :return:
-        """
-        if self.debug_mode:
-            print("******: getting url: {}".format(url))
-
+        logger.debug(f"Fetching static page: {url}")
         page = requests.get(url, headers=HEADER_)
         time.sleep(self.delay)
         return page
 
-    def get_dynamic_page(self, url):
+    def get_dynamic_page(self, url: str) -> str:
         """
-        gets dynamic web page source insluding javascript elements then waits 10 seconds
-        :param url:
-        :return:
+        Get dynamic page with browser (for JavaScript-rendered content)
+
+        Args:
+            url: URL to fetch
+
+        Returns:
+            Page source HTML
         """
+        logger.debug(f"Fetching dynamic page: {url}")
+        return self.browser_manager.get_page(url, delay=self.delay)
 
-        if self.debug_mode:
-            print("******: getting a dynamic page")
-        time.sleep(self.delay)
-        page = self.driver.get(url)
-        #print(driver.page_source)
-        return self.driver.page_source
-
-    def get_browse_page_lenght(self):
+    def get_browse_page_length(self) -> int:
         """
-        Gets the amount of pages within the given search
-        :return:
+        Get the maximum page number from search results
+
+        Returns:
+            Maximum page number
         """
-        if self.debug_mode:
-            print("******: getting the lenght of the browse page")
+        logger.info("Determining browse page length")
 
-        navigation_bar = self.root_soup.find_all(title='pagination')[0]
-        buttons = navigation_bar.find_all('a')
-        page_nums =[]
-        for button in buttons:
-            #print(button.attrs)
-            url = button['href']
-            urls_split = url.split("=")
-            try:
-                pagenum = int(urls_split[-1])
-                page_nums.append(pagenum)
-            except:
-                print("could not get page num from {} URL, trying text instead".format(url))
-                button_text = str(button.get_text())
-                if button_text.isnumeric():
-                    page_nums.append(int(button_text))
-                else:
-                    print("Could not get page num from button")
+        try:
+            navigation_bar = self.root_soup.find_all(title='pagination')
+            if not navigation_bar:
+                logger.warning("No pagination found")
+                return 1
 
-        return max(page_nums)
+            navigation_bar = navigation_bar[0]
+            buttons = navigation_bar.find_all('a')
+            page_nums = []
 
-    def get_Story_meta_data(self, article_card):
-        """
-        Makes a metadata object that will cotian useful info about the story like its title chapter numbers and a link to the story
-        :param article_card:
-        :return:
-        """
-        if self.debug_mode:
-            print("******: finding the story metadata")
-
-        story_metaData_Object = {}
-
-        title = article_card.find_all(class_='heading')
-        for entry in title:
-            if 'Fandoms:' not in entry.get_text():
+            for button in buttons:
+                url = button.get('href', '')
+                urls_split = url.split("=")
                 try:
-                    lines = entry.find_all('a')
-                    story_metaData_Object["Link"] = (lines[0])['href']
-                except IndexError:
-                    #no link here
-                    continue
+                    pagenum = int(urls_split[-1])
+                    page_nums.append(pagenum)
+                except (ValueError, IndexError):
+                    logger.debug(f"Could not extract page number from URL: {url}, trying button text")
+                    button_text = str(button.get_text())
+                    if button_text.isnumeric():
+                        page_nums.append(int(button_text))
 
-                try:
-                    split_title = entry.get_text().split("\n")
-                    story_metaData_Object["Title"] = split_title[1]
-                    story_metaData_Object["Author"] = split_title[5]
-                except IndexError:
-                    #Not the title header
-                    continue
+            if not page_nums:
+                logger.warning("No page numbers found")
+                return 1
 
-        if self.debug_mode:
-            print("******: getting the static metadata tags")
+            max_page = max(page_nums)
+            logger.info(f"Maximum page number: {max_page}")
+            return max_page
 
-        Tags = article_card.find_all(class_='tag')
-        story_metaData_Object["Tags"] = [tag.get_text() for tag in Tags]
+        except Exception as e:
+            logger.error(f"Error determining page length: {e}", exc_info=True)
+            return 1
 
-        Summary = article_card.find_all(class_='userstuff summary')
-        story_metaData_Object["Story Summary"] = [paragraph.get_text() + "\n \n" for paragraph in Summary]
-
-        #stats
-        story_Language = article_card.find_all('dd', class_='language')[0].get_text()
-        chapters = article_card.find_all('dd', class_='chapters')[0].get_text()
-
-        if story_Language != 'English':
-            return "<_STORY NOT IN ENGLISH_>"
-
-        current_chapters = chapters.split("/")[0]
-        if self.debug_mode:
-            print("******: buiulding finial metadata")
-
-        story_metaData_Object["Language"] = story_Language
-        story_metaData_Object["Chapters"] = current_chapters
-
-
-        return story_metaData_Object
-
-    def Story_index(self, link):
+    def get_story_metadata(self, article_card) -> Dict:
         """
-        Gets the index page for the given story
-        :param link:
-        :return: a lst of link to chapters for that story
+        Extract metadata from story article element
+
+        Args:
+            article_card: BeautifulSoup article element
+
+        Returns:
+            Dictionary of metadata
         """
-        if self.debug_mode:
-            print("******: getting index of a story")
+        story_metadata_object = {}
+        story_metadata_object["SOURCE"] = "ArchiveOfOurOwn"
 
-        chapter_link_lst = []
+        try:
+            # Extract title and author
+            title_elements = article_card.find_all(class_='heading')
+            for entry in title_elements:
+                if 'Fandoms:' not in entry.get_text():
+                    try:
+                        lines = entry.find_all('a')
+                        story_metadata_object["Link"] = lines[0]['href']
+                    except (IndexError, KeyError):
+                        continue
 
-        index_page = self.get_page(STORY_INDEX_CONSTANT.format(url=link))
-        index_soup = BeautifulSoup(index_page.content, 'html.parser')
+                    try:
+                        split_title = entry.get_text().split("\n")
+                        story_metadata_object["Title"] = split_title[1]
+                        story_metadata_object["Author"] = split_title[5]
+                    except IndexError:
+                        continue
 
-        chapter_index = index_soup.find(class_= 'chapter index group')
+            # Extract tags
+            tags = article_card.find_all(class_='tag')
+            story_metadata_object["Tags"] = [tag.get_text() for tag in tags]
 
-        for chapter in chapter_index:
-            try:
-                chapter_link_lst.append(chapter.find('a')['href'])
-            except TypeError:
-                pass
-        return chapter_link_lst
+            # Extract summary
+            summary = article_card.find_all(class_='userstuff summary')
+            story_metadata_object["Story Summary"] = [paragraph.get_text() + "\n \n" for paragraph in summary]
 
-    def ingest_chapter(self, link):
+            # Extract language and chapters
+            language_element = article_card.find_all('dd', class_='language')
+            chapters_element = article_card.find_all('dd', class_='chapters')
+
+            if not language_element or not chapters_element:
+                logger.warning("Missing language or chapters metadata")
+                return {"error": "Missing required metadata"}
+
+            story_language = language_element[0].get_text()
+            chapters = chapters_element[0].get_text()
+
+            if story_language != 'English':
+                return {"error": "<_STORY NOT IN ENGLISH_>"}
+
+            current_chapters = chapters.split("/")[0]
+            story_metadata_object["Language"] = story_language
+            story_metadata_object["Chapters"] = current_chapters
+
+            return story_metadata_object
+
+        except Exception as e:
+            logger.error(f"Error extracting metadata: {e}", exc_info=True)
+            return {"error": f"Failed to extract metadata: {e}"}
+
+    def ingest_chapter(self, link: str) -> Dict:
         """
-        expects to be given a link to a chpater will return a lst of string for the phapgraphs of that story
-        :param link:
-        :return:
+        Ingest a single chapter story
+
+        Args:
+            link: Story link
+
+        Returns:
+            Dictionary with chapter text
         """
-        if self.debug_mode:
-            print("******: ingesting a chapter")
+        logger.info(f"Ingesting single chapter: {link}")
 
-        chapter_contents = []
+        try:
+            chapter_text = []
+            chapter_link = STORY_PAGE_CONSTANT.format(url=link)
+            chapter_page = self.get_dynamic_page(chapter_link)
+            chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
 
-        chapterlink = STORY_PAGE_CONSTANT.format(url=link)
-        chapter_page = self.get_dynamic_page(chapterlink)
+            chapter_group = chapter_soup.find('div', class_='userstuff module')
 
-        chapter_soup = BeautifulSoup(chapter_page, 'html.parser')
+            if chapter_group:
+                for tag in chapter_group:
+                    text = tag.get_text() if hasattr(tag, 'get_text') else str(tag)
+                    if text.strip():
+                        chapter_text.append(text)
+            else:
+                # Fallback to simpler search
+                userstuff = chapter_soup.find('div', class_='userstuff')
+                if userstuff:
+                    chapter_text.append(userstuff.get_text())
 
-        chpaters_group = chapter_soup.find_all('div', class_='chapter')[0]
-        chapters = chpaters_group.find_all(role='article')
+            joined_text = ' '.join(chapter_text)
+            logger.info(f"Collected single chapter, length: {len(chapter_text)} elements")
+            return {"1": joined_text}
 
-        for phargraph in chapters:
-            text = phargraph.get_text()
-            if len(text) > 35:
-                if self.debug_mode:
-                    print("******: printing a sample")
-                print("sample")
-                text_sample = text.encode('utf-8')
-                print(text_sample[0:180])
+        except Exception as e:
+            logger.error(f"Error ingesting chapter: {e}", exc_info=True)
+            return {"1": ""}
 
+    def ingest_full_story(self, link: str) -> Dict:
+        """
+        Ingest a multi-chapter story
 
-            print("Size of text uncompressed: {}".format(sys.getsizeof(text)))
+        Args:
+            link: Story link
 
-            # compressed = zlib.compress(text.encode()) #basic string compression
-            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
+        Returns:
+            Dictionary of chapters
+        """
+        logger.info(f"Ingesting full story: {link}")
 
-            chapter_contents.append(text)
-        return chapter_contents
-
-    def ingest_full_story(self, link):
-        if self.debug_mode:
-            print("******: ingesting a story")
         chapters = {}
 
-        full_story_link = VIEW_ALL_CONSTANT.format(url=link)
-        print(full_story_link)
-        full_story_page = self.get_dynamic_page(full_story_link)
+        try:
+            full_story_link = VIEW_ALL_CONSTANT.format(url=link)
+            logger.debug(f"Full story URL: {full_story_link}")
+            full_story_page = self.get_dynamic_page(full_story_link)
 
-        story_soup = BeautifulSoup(full_story_page, 'html.parser')
-        #print(story_soup)
-        chapters_lst = story_soup.find_all(lambda tag: tag.name == 'div' and tag.get('class') == ['chapter'])
-        # ^ will explicitly match a div that has the class name chapter not just chapter in its name
+            story_soup = BeautifulSoup(full_story_page, 'html.parser')
+            chapters_lst = story_soup.find_all(lambda tag: tag.name == 'div' and tag.get('class') == ['chapter'])
 
-        count = 1
-        print("Chapter lst len: ", len(chapters_lst))
-        for chapter in chapters_lst:
-            if self.debug_mode:
-                print("******: getting al the chapters")
+            logger.info(f"Found {len(chapters_lst)} chapters")
 
-            chapter_contents = []
+            for count, chapter in enumerate(chapters_lst, start=1):
+                chapter_num = count
+                text = chapter.get_text()
 
-            chapter_num = count
-            heading = "Chapter {}".format(chapter_num)
-            chapter_contents.append(heading)
-            text = chapter.get_text()
+                if len(text) > 90:
+                    logger.debug(f"Chapter {chapter_num} sample: {text[:120]}")
 
-            if len(text) > 90:
-                if self.debug_mode:
-                    print("******: printning a chapter sample from a full story")
-                print("sample")
-                text_sample = text.encode(encoding='utf-8')
-                print(text_sample[0:120])
+                logger.debug(f"Chapter {chapter_num} size: {sys.getsizeof(text)} bytes")
+                chapters[str(chapter_num)] = text
 
+            logger.info(f"Successfully ingested {len(chapters)} chapters")
+            return chapters
 
-            print("Size of text uncompressed........: {}".format(sys.getsizeof(text)))
+        except Exception as e:
+            logger.error(f"Error ingesting full story: {e}", exc_info=True)
+            return {}
 
-            # compressed = zlib.compress(text.encode()) #basic string compression
-            # print("Size of text compressed: {}".format(sys.getsizeof(compressed)))
-
-            chapter_contents.append(text)
-            chapters[str(chapter_num)] = text
-            count += 1
-
-
-        return chapters
-
-    def ingest_story(self, link, name):
+    def ingest_story(self, link: str, name: str, ingest_single: bool = False) -> Dict:
         """
-        give a link from metadata object, will get a lst of chpater link and get the strings of the chapters
-        returns a dict with int as keys for the chpater number. starting at 1
-        :param link:
-        :return:
+        Ingest a story (single chapter or multi-chapter)
+
+        Args:
+            link: Story link
+            name: Story name
+            ingest_single: Whether this is a single chapter story
+
+        Returns:
+            Dictionary of chapters
         """
+        logger.info(f"Starting ingest of '{name}' (single_chapter={ingest_single})")
 
-        # OLD CODE for ingesting one chapter at a time might be useful to keep if we need it
-        # chapters = {}
-        # chapter_index = self.Story_index(link)
-        #
-        # count = 1
-        # for chapter in chapter_index:
-        #     print("----------------------------------------------")
-        #     print("Starting ingest of chapter {}".format(count))
-        #     chapters[str(count)] = self.ingest_chapter(chapter)
-        #     print("Finished ingest of chapter {}".format(count))
-        #     count += 1
+        try:
+            if ingest_single:
+                chapters = self.ingest_chapter(link)
+            else:
+                chapters = self.ingest_full_story(link)
 
-        print("----------------------------------------------")
-        print("Starting ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
-        chapters = self.ingest_full_story(link)
-        print("Finished ingest of {} and its chapters".format(name.encode(encoding='utf-8')))
+            logger.info(f"Finished ingesting '{name}'")
+            return chapters
 
-        return chapters
+        except Exception as e:
+            logger.error(f"Error ingesting story '{name}': {e}", exc_info=True)
+            return {}
+
+    def ingest_searchpage(self, pagenum: int) -> List[Dict]:
+        """
+        Ingest all stories from a search page
+
+        Args:
+            pagenum: Page number to ingest
+
+        Returns:
+            List of story dictionaries
+        """
+        story_batch = []
+        logger.info(f"Ingesting search page {pagenum}")
+
+        try:
+            searchpage_url = self.search_page_constant.format(pagenum)
+            searchpage = self.get_page(searchpage_url)
+            searchpage_soup = BeautifulSoup(searchpage.content, 'html.parser')
+            story_list = searchpage_soup.find_all(role='article')
+
+            logger.info(f"Found {len(story_list)} stories on page {pagenum}")
+
+            for count, story in enumerate(story_list):
+                story_object = {}
+                story_metadata = self.get_story_metadata(story)
+
+                # Check for errors
+                if 'error' in story_metadata:
+                    if story_metadata['error'] == '<_STORY NOT IN ENGLISH_>':
+                        logger.info("Skipping non-English story")
+                    else:
+                        logger.warning(f"Metadata extraction failed: {story_metadata['error']}")
+                    continue
+
+                story_object['MetaData'] = story_metadata
+
+                # Check if already ingested
+                if not self.check_ingested_log(story_metadata):
+                    logger.info("Story already ingested, skipping")
+                    continue
+
+                is_single_chapter = int(story_metadata['Chapters']) == 1
+                logger.info(f"Starting ingest of '{story_metadata['Title']}', {story_metadata['Chapters']} chapters")
+                story_content = self.ingest_story(story_metadata['Link'], story_metadata['Title'], ingest_single=is_single_chapter)
+                story_object['Content'] = story_content
+                logger.info(f"Ingesting story {count + 1} of {len(story_list)} in current batch")
+
+                # Add to database if configured
+                if self.add_singles and self.data_base:
+                    logger.info(f"Adding '{story_metadata['Title']}' to database collection '{self.target_col}'")
+                    self.data_base.add_to_database(
+                        itemToAdd=story_object,
+                        targetCollection=self.target_col,
+                        print_IDs=True
+                    )
+                else:
+                    story_batch.append(story_object)
+
+            logger.info(f"Completed ingesting page {pagenum}")
+            return story_batch
+
+        except Exception as e:
+            logger.error(f"Error ingesting search page {pagenum}: {e}", exc_info=True)
+            return story_batch
+
+    def close(self):
+        """Close browser and cleanup resources"""
+        logger.info("Closing ArchiveOfOurOwnScraper")
+        if self.browser_manager:
+            self.browser_manager.close()
+
+    def __del__(self):
+        """Destructor - ensure cleanup"""
+        try:
+            self.close()
+        except:
+            pass
+
+
+# Keep backward compatibility with old class name
+ArchiveOOO = ArchiveOfOurOwnScraper
