@@ -22,6 +22,8 @@ ENV/
 *.log
 *.json.bak
 temp.json
+Ingested_Log.json
+*Ingested_Log.json
 *.bat
 
 # Data and outputs
